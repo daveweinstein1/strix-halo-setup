@@ -18,7 +18,7 @@ cd ~/strix-halo-setup
 chmod +x master-control.sh stages/*.sh
 
 # 3. Designate yourself as the Master Control Program
-sudo ./master-control.sh
+./master-control.sh
 ```
 
 ## 🛠️ Automation Stages
