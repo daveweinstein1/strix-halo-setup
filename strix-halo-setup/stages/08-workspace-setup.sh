@@ -49,7 +49,9 @@ if confirm_yes "Create/Setup 'ai-lab'?"; then
             lxc exec ai-lab -- pacman -S --needed --noconfirm $PACKAGES
             
         # Verify ROCm Version (Critical for Strix Halo)
-        ROCM_VER=$(lxc exec ai-lab -- pacman -Qi rocm-core | grep "Version" | awk '{print $3}')
+        # Use pacman -Q (short) and strip epoch (cut -d: -f2)
+        ROCM_VER=$(lxc exec ai-lab -- pacman -Q rocm-core 2>/dev/null | awk '{print $2}' | cut -d: -f2)
+        
         if [[ "$ROCM_VER" == 7.1* ]]; then
             success "ROCm 7.1 detected ($ROCM_VER) - Strix Halo Ready"
         else
