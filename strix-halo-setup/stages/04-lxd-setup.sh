@@ -9,55 +9,31 @@ stage_start "04-lxd-setup"
 check_root
 
 # ----------------------------------------------------------------------------
-# Step 1: Conflict Resolution
+# Step 1: Install LXD
 # ----------------------------------------------------------------------------
-step 1 "Check for Conflicts (systemd-resolved / dnsmasq)"
+step 1 "Install LXD Package"
 
-CONFLICTS=""
-if systemctl is-active --quiet systemd-resolved; then
-    CONFLICTS="$CONFLICTS systemd-resolved"
-fi
-if systemctl is-active --quiet dnsmasq; then
-    CONFLICTS="$CONFLICTS dnsmasq"
-fi
-
-if [ -n "$CONFLICTS" ]; then
-    warn "Conflicting services detected: $CONFLICTS"
-    warn "LXD manages its own DNS/DHCP."
-    if confirm_yes "Disable conflicting services?"; then
-        for svc in $CONFLICTS; do
-            run_cmd "Stopping $svc" systemctl stop $svc
-            run_cmd "Disabling $svc" systemctl disable $svc
-        done
-    fi
-else
-    success "No conflicting services detected."
-fi
-
-# ----------------------------------------------------------------------------
-# Step 2: Install LXD Dependencies
-# ----------------------------------------------------------------------------
-step 2 "Install Packages"
-
-DEPS="lxc lxd dnsmasq bridge-utils iptables ebtables"
+# Only install 'lxd'. 
+# Dependencies (iptables-nft, dnsmasq, etc.) are handled by pacman automatically.
+# We avoid explicit 'iptables' to prevent conflict with 'iptables-nft'.
+DEPS="lxd"
 info "Packages: $DEPS"
 
-if confirm_yes "Install LXD packages?"; then
-    run_cmd "Installing LXD stack" pacman -S --needed --noconfirm $DEPS
+if confirm_yes "Install LXD?"; then
+    run_cmd "Installing LXD" pacman -S --needed --noconfirm $DEPS
 fi
 
 # ----------------------------------------------------------------------------
-# Step 3: Service Setup
+# Step 2: Service Setup
 # ----------------------------------------------------------------------------
-step 3 "Enable LXD Service"
+step 2 "Enable LXD Service"
 
 if confirm_yes "Enable and Start lxd.service?"; then
-    run_cmd "Enabling LXD" systemctl enable lxd.service
-    run_cmd "Starting LXD" systemctl start lxd.service
+    run_cmd "Enabling lxd.socket" systemctl enable --now lxd.socket
     
     sleep 2
-    if systemctl is-active --quiet lxd; then
-        success "LXD is running"
+    if systemctl is-active --quiet lxd.socket; then
+        success "LXD socket is active"
     else
         error "LXD failed to start"
         run_cmd "Checking Status" systemctl status lxd
@@ -67,9 +43,9 @@ if confirm_yes "Enable and Start lxd.service?"; then
 fi
 
 # ----------------------------------------------------------------------------
-# Step 4: User Group
+# Step 3: User Group
 # ----------------------------------------------------------------------------
-step 4 "Add User to 'lxd' Group"
+step 3 "Add User to 'lxd' Group"
 
 CURRENT_USER=$(logname || echo $SUDO_USER)
 if [ -z "$CURRENT_USER" ]; then
@@ -83,21 +59,35 @@ else
 fi
 
 # ----------------------------------------------------------------------------
-# Step 5: Initialize LXD
+# Step 4: Initialize LXD & Networking
 # ----------------------------------------------------------------------------
-step 5 "Initialize LXD"
+step 4 "Initialize LXD Network"
 
-info "Method: lxd init --auto (Defaults: dir storage, lxdbr0 bridge)"
+info "Running 'lxd init --auto' (Creates lxdbr0)"
 
-if confirm_yes "Run automatic initialization?"; then
+if confirm_yes "Initialize LXD now?"; then
     if lxd init --auto &>> "$STAGE_LOG"; then
         success "LXD initialized"
+        
+        # FIX for systemd-resolved:
+        # Instead of disabling resolved, we configure the lxdbr0 link
+        if systemctl is-active --quiet systemd-resolved; then
+            info "Configuring systemd-resolved for lxdbr0..."
+            
+            # Wait for bridge to appear
+            sleep 2
+            
+            # Get Bridge IP
+            if BRIDGE_IP=$(lxc network get lxdbr0 ipv4.address 2>/dev/null | cut -d/ -f1); then
+                run_cmd "Setting DNS for lxdbr0" resolvectl dns lxdbr0 "$BRIDGE_IP"
+                run_cmd "Setting Domain for lxdbr0" resolvectl domain lxdbr0 '~lxd'
+                success "DNS resolution configured for .lxd domain"
+            else
+                warn "Could not determine lxdbr0 IP - skipping DNS config"
+            fi
+        fi
     else
         warn "Auto init failed. You may need to run 'lxd init' manually."
-        if confirm "Run interactive 'lxd init' now?"; then
-            # We run this directly to allow interaction
-            lxd init
-        fi
     fi
 fi
 
