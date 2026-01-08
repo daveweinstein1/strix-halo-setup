@@ -8,7 +8,7 @@ source "$(dirname "$0")/../lib/common.sh"
 stage_start "01-kernel-config"
 check_root
 
-log "Requirements: Kernel 6.18+ (Bleeding Edge Strix Halo Support)"
+log "Requirements: Kernel 6.14+ (6.17+ rec for Strix Halo NPU/ISP)"
 
 # ----------------------------------------------------------------------------
 # Step 1: Backup GRUB
@@ -33,12 +33,14 @@ log "Current kernel: $KERNEL_CURRENT"
 K_MAJ=$(echo "$KERNEL_CURRENT" | cut -d. -f1)
 K_MIN=$(echo "$KERNEL_CURRENT" | cut -d. -f2)
 
-# Check for 6.18+ (or 7.x+)
-if [ "$K_MAJ" -gt 6 ] || { [ "$K_MAJ" -eq 6 ] && [ "$K_MIN" -ge 18 ]; }; then
-    success "Kernel version $KERNEL_CURRENT meets requirement (6.18+)"
+# Check for 6.14+ (AMDXDNA NPU driver), warn if < 6.17
+if [ "$K_MAJ" -gt 6 ] || { [ "$K_MAJ" -eq 6 ] && [ "$K_MIN" -ge 17 ]; }; then
+    success "Kernel version $KERNEL_CURRENT meets recommended requirement (6.17+)"
+elif [ "$K_MAJ" -eq 6 ] && [ "$K_MIN" -ge 14 ]; then
+    warn "Kernel version $KERNEL_CURRENT meets minimum (6.14+) but 6.17+ recommended"
 else
-    warn "Kernel version $KERNEL_CURRENT is older than required (6.18+)"
-    warn "Strix Halo (gfx1150) NPU/ISP support requires bleeding edge 6.18+."
+    warn "Kernel version $KERNEL_CURRENT is older than required (6.14+)"
+    warn "Strix Halo (gfx1151) NPU support requires kernel 6.14+ (AMDXDNA driver)."
     if ! confirm "Continue anyway (Not Recommended)?"; then
         stage_failed
         exit 1

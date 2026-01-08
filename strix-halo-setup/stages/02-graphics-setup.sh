@@ -8,8 +8,8 @@ source "$(dirname "$0")/../lib/common.sh"
 stage_start "02-graphics-setup"
 check_root
 
-log "Target: AMD Strix Halo (gfx1150)"
-log "Requirements (Dec 2025): Mesa 24.1+ (25.3+ rec), LLVM 17+ (21+ rec)"
+log "Target: AMD Strix Halo (gfx1151)"
+log "Requirements (Jan 2026): Mesa 25.0+ (25.4+ rec), LLVM 19+ (21+ rec)"
 
 # ----------------------------------------------------------------------------
 # Step 1: Sync Database
