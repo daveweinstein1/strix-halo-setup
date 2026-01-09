@@ -44,12 +44,45 @@
 
 ## Quick Install
 
-Once the repo is public:
+**Short version** (via bit.ly — *coming soon*):
+```bash
+curl -fsSL https://bit.ly/strix-halo | sudo bash
+```
+
+<details>
+<summary><strong>What does this do?</strong> (click to expand)</summary>
+
+The short URL redirects to this bootstrap script:
+```
+https://raw.githubusercontent.com/daveweinstein1/strix-halo-setup/main/install.sh
+```
+
+Which does the following:
+```bash
+#!/bin/bash
+# Downloads the installer binary from GitHub Releases
+curl -fsSL "https://github.com/daveweinstein1/strix-halo-setup/releases/latest/download/strix-install" -o /tmp/strix-install
+
+# Makes it executable
+chmod +x /tmp/strix-install
+
+# Runs the installer
+/tmp/strix-install "$@"
+
+# Cleans up
+rm -f /tmp/strix-install
+```
+
+View the full script: [install.sh](strix-halo-setup/install.sh)
+
+</details>
+
+**Direct download** (no bit.ly):
 ```bash
 curl -fsSL https://github.com/daveweinstein1/strix-halo-setup/releases/latest/download/strix-install -o /tmp/s && chmod +x /tmp/s && sudo /tmp/s
 ```
 
-**Options:** `--tui` (terminal) or `--web` (browser)
+**Options:** `--tui` (terminal) | `--web` (browser) | `--menu` (select stages)
 
 ---
 
