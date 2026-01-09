@@ -32,7 +32,7 @@ var (
 	forceWeb        = flag.Bool("web", false, "Force web mode (localhost + browser)")
 	autoMode        = flag.Bool("auto", false, "Run all stages without prompts")
 	manualMode      = flag.Bool("manual", false, "Manually select stages to run")
-	marketplaceMode = flag.Bool("marketplace", false, "Browse Container Hub")
+	marketplaceMode = flag.Bool("hub", false, "Browse Container Hub")
 	checkVersions   = flag.Bool("check-versions", false, "Check package versions and exit")
 	dryRun          = flag.Bool("dry-run", false, "Simulate installation without changes")
 )

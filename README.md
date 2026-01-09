@@ -55,7 +55,7 @@ Browse and install community containers from multiple sources directly in the in
 - **AMD Official**: AI frameworks (ComfyUI + ROCm)
 - **Community**: Verified contributions
 
-**Launch:** `strix-install --marketplace`
+**Launch:** `strix-install --hub`
 
 The hub integrates with your LXD environment, allowing you to install pre-configured containers into `ai-lab`, `dev-lab`, or custom instances with a single command.
 
@@ -97,7 +97,7 @@ curl -fsSL https://github.com/daveweinstein1/strix-halo-setup/releases/latest/do
 |------|-------------|
 | `--tui` | Force Terminal UI (Default) |
 | `--web` | Force Web UI (Browser) |
-| `--marketplace` | Browse Container Hub |
+| `--hub` | Browse Container Hub |
 | `--manual` | Select specific stages |
 | `--auto` | Run all stages (no prompts) |
 | `--check-versions` | Verify package versions |
