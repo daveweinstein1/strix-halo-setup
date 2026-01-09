@@ -5,18 +5,16 @@ import (
 	"embed"
 	"flag"
 	"fmt"
-	"io/fs"
-	"net"
-	"net/http"
 	"os"
-	"os/exec"
 	"strings"
-	"time"
 
 	"github.com/charmbracelet/bubbles/progress"
 	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/wailsapp/wails/v2"
+	"github.com/wailsapp/wails/v2/pkg/options"
+	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
 
 	"github.com/daveweinstein1/strixforge/pkg/containerhub"
 	"github.com/daveweinstein1/strixforge/pkg/core"
@@ -27,9 +25,12 @@ import (
 //go:embed frontend/*
 var frontendFS embed.FS
 
+//go:embed all:frontend/dist
+var guiAssets embed.FS
+
 var (
 	forceTUI        = flag.Bool("tui", false, "Force TUI mode")
-	forceWeb        = flag.Bool("web", false, "Force web mode (localhost + browser)")
+	forceGUI        = flag.Bool("gui", false, "Force GUI mode (native window)")
 	autoMode        = flag.Bool("auto", false, "Run all stages without prompts")
 	manualMode      = flag.Bool("manual", false, "Manually select stages to run")
 	marketplaceMode = flag.Bool("hub", false, "Browse Container Hub")
@@ -64,14 +65,14 @@ func main() {
 		return
 	}
 
-	if *forceWeb {
-		runWebMode()
+	if *forceGUI {
+		runGUI()
 		return
 	}
 
-	// Auto-detect: try web first if DISPLAY is set, otherwise TUI
+	// Auto-detect: GUI if display available, otherwise TUI
 	if os.Getenv("DISPLAY") != "" || os.Getenv("WAYLAND_DISPLAY") != "" {
-		runWebMode()
+		runGUI()
 	} else {
 		runTUI()
 	}
@@ -209,136 +210,75 @@ func (a *autoUIAdapter) Input(message string, defaultVal string) string {
 	return defaultVal
 }
 
-// runWebMode starts a local HTTP server and opens a browser
-func runWebMode() {
-	// Find an available port
-	listener, err := net.Listen("tcp", "127.0.0.1:0")
+// runGUI starts the native Wails GUI
+func runGUI() {
+	// Create an instance of the app structure
+	app := NewGUIApp()
+
+	// Create application with options
+	err := wails.Run(&options.App{
+		Title:  "Strixforge",
+		Width:  1024,
+		Height: 768,
+		AssetServer: &assetserver.Options{
+			Assets: guiAssets,
+		},
+		BackgroundColour: &options.RGBA{R: 27, G: 38, B: 54, A: 1},
+		OnStartup:        app.startup,
+		Bind: []interface{}{
+			app,
+		},
+	})
+
 	if err != nil {
-		fmt.Println("Could not start web server, falling back to TUI")
+		fmt.Println("Could not start GUI, falling back to TUI")
 		runTUI()
-		return
 	}
-	port := listener.Addr().(*net.TCPAddr).Port
-	listener.Close()
-
-	// Start HTTP server
-	addr := fmt.Sprintf("127.0.0.1:%d", port)
-	url := fmt.Sprintf("http://%s", addr)
-
-	// Serve embedded frontend
-	subFS, _ := fs.Sub(frontendFS, "frontend")
-	http.Handle("/", http.FileServer(http.FS(subFS)))
-
-	// API endpoints for the web UI
-	http.HandleFunc("/api/device", handleDevice)
-	http.HandleFunc("/api/stages", handleStages)
-	http.HandleFunc("/api/run", handleRun)
-
-	go func() {
-		if err := http.ListenAndServe(addr, nil); err != nil {
-			fmt.Printf("Server error: %v\n", err)
-		}
-	}()
-
-	// Give server a moment to start
-	time.Sleep(100 * time.Millisecond)
-
-	// Try to open browser in app mode
-	if !openBrowser(url) {
-		fmt.Printf("Could not open browser. Please navigate to: %s\n", url)
-		fmt.Println("Press Ctrl+C to exit")
-	} else {
-		fmt.Printf("Installer running at: %s\n", url)
-		fmt.Println("Press Ctrl+C to exit")
-	}
-
-	// Block forever (until Ctrl+C)
-	select {}
 }
 
-// openBrowser tries to open a browser in app mode (no menus)
-func openBrowser(url string) bool {
-	browsers := []struct {
-		name string
-		args []string
-	}{
-		{"google-chrome", []string{"--app=" + url}},
-		{"google-chrome-stable", []string{"--app=" + url}},
-		{"chromium", []string{"--app=" + url}},
-		{"chromium-browser", []string{"--app=" + url}},
-		{"brave", []string{"--app=" + url}},
-		{"brave-browser", []string{"--app=" + url}},
-		{"firefox", []string{"--new-window", url}},
-	}
-
-	for _, b := range browsers {
-		if path, err := exec.LookPath(b.name); err == nil {
-			cmd := exec.Command(path, b.args...)
-			if err := cmd.Start(); err == nil {
-				return true
-			}
-		}
-	}
-
-	// Last resort: xdg-open
-	if path, err := exec.LookPath("xdg-open"); err == nil {
-		cmd := exec.Command(path, url)
-		if err := cmd.Start(); err == nil {
-			return true
-		}
-	}
-
-	return false
+// GUIApp struct for Wails
+type GUIApp struct {
+	ctx            context.Context
+	marketplaceMgr *containerhub.Manager
 }
 
-// API handlers for web UI
+// NewGUIApp creates a new GUIApp
+func NewGUIApp() *GUIApp {
+	mgr := containerhub.NewManager()
+	_ = mgr.LoadConfigFromPath("configs/registries.yaml")
+	return &GUIApp{marketplaceMgr: mgr}
+}
+
+func (a *GUIApp) startup(ctx context.Context) {
+	a.ctx = ctx
+}
+
+// GetSystemStatus returns detected hardware info
+func (a *GUIApp) GetSystemStatus() map[string]string {
+	status := make(map[string]string)
+	device, err := strixhalo.Detect(a.ctx)
+	if err != nil {
+		status["error"] = err.Error()
+		return status
+	}
+	status["name"] = device.Name()
+	status["manufacturer"] = device.Manufacturer()
+	status["model"] = device.Model()
+	status["quirks_count"] = fmt.Sprintf("%d", len(device.Quirks()))
+	return status
+}
+
+// FetchHubImages returns all available images from Container Hub
+func (a *GUIApp) FetchHubImages() []containerhub.Image {
+	images, err := a.marketplaceMgr.FetchAllImages(a.ctx)
+	if err != nil {
+		return []containerhub.Image{}
+	}
+	return images
+}
+
+// API handlers kept for compatibility (unused now)
 var platform = strixhalo.New()
-var device core.Device
-
-func handleDevice(w http.ResponseWriter, r *http.Request) {
-	if device == nil {
-		device, _ = platform.Detect()
-	}
-
-	name := "Unknown Device"
-	if device != nil {
-		name = device.Name()
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	fmt.Fprintf(w, `{"name": "%s"}`, name)
-}
-
-func handleStages(w http.ResponseWriter, r *http.Request) {
-	if device == nil {
-		device, _ = platform.Detect()
-	}
-
-	stages := platform.Stages()
-	w.Header().Set("Content-Type", "application/json")
-
-	var sb strings.Builder
-	sb.WriteString("[")
-	for i, s := range stages {
-		if i > 0 {
-			sb.WriteString(",")
-		}
-		optional := "false"
-		if s.Optional() {
-			optional = "true"
-		}
-		fmt.Fprintf(&sb, `{"id":"%s","name":"%s","optional":%s}`, s.ID(), s.Name(), optional)
-	}
-	sb.WriteString("]")
-	w.Write([]byte(sb.String()))
-}
-
-func handleRun(w http.ResponseWriter, r *http.Request) {
-	// This would trigger the actual installation
-	// For now, just acknowledge
-	w.Header().Set("Content-Type", "application/json")
-	fmt.Fprintf(w, `{"status": "started"}`)
-}
 
 // =============================================================================
 // TUI Mode (Bubble Tea)

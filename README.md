@@ -95,13 +95,15 @@ curl -fsSL https://github.com/daveweinstein1/strixforge/releases/latest/download
 
 | Flag | Description |
 |------|-------------|
-| `--tui` | Force Terminal UI (Default) |
-| `--web` | Force Web UI (Browser) |
+| `--tui` | Force Terminal UI |
+| `--gui` | Force Native GUI |
 | `--hub` | Browse Container Hub |
 | `--manual` | Select specific stages |
 | `--auto` | Run all stages (no prompts) |
 | `--check-versions` | Verify package versions |
 | `--dry-run` | Simulate without changes |
+
+*Auto-detects GUI if `$DISPLAY` or `$WAYLAND_DISPLAY` is set, otherwise uses TUI.*
 
 ---
 
