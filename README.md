@@ -31,62 +31,47 @@
 <p align="center">
   <strong>Terminal (TUI)</strong><br>
   <img src="assets/tui-screenshot.png" alt="TUI Screenshot" width="500"><br>
-  <em>Simulated screenshot — actual UI coming soon</em>
+  <em>Stage-based installation with progress tracking</em>
 </p>
 
 <p align="center">
   <strong>Web UI (Browser)</strong><br>
-  <img src="assets/gui-screenshot.png" alt="GUI Screenshot" width="500"><br>
-  <em>Simulated screenshot — actual UI coming soon</em>
+  <em>Coming soon — graphical interface in development</em>
 </p>
+
+---
+
+## Installation Guide
+
+📖 **[Online Installation Guide](https://daveweinstein1.github.io/strix-halo-setup/install-guide.html)** (Recommended)
+
+📄 [Text Version](docs/INSTALL_GUIDE.md)
 
 ---
 
 ## Quick Install
 
-
-**Short version** (via bit.ly — *coming soon*):
-- **[Printable Web Guide](https://daveweinstein1.github.io/strix-halo-setup/install-guide.html)** (Recommended)
-- [Text Guide](docs/INSTALL_GUIDE.md)
-
 ```bash
 curl -fsSL https://bit.ly/strix-halo | sudo bash
 ```
 
-<details>
-<summary><strong>What does this do?</strong> (click to expand)</summary>
-
-The short URL redirects to this bootstrap script:
-```
-https://raw.githubusercontent.com/daveweinstein1/strix-halo-setup/main/install.sh
-```
-
-Which does the following:
+This downloads and runs the installer binary from GitHub Releases:
 ```bash
-#!/bin/bash
-# Downloads the installer binary from GitHub Releases
-curl -fsSL "https://github.com/daveweinstein1/strix-halo-setup/releases/latest/download/strix-install" -o /tmp/strix-install
-
-# Makes it executable
+# What the script does:
+curl -fsSL "https://github.com/.../strix-install" -o /tmp/strix-install
 chmod +x /tmp/strix-install
-
-# Runs the installer
 /tmp/strix-install "$@"
-
-# Cleans up
 rm -f /tmp/strix-install
 ```
 
 View the full script: [install.sh](install.sh)
-
-</details>
 
 **Direct download** (no bit.ly):
 ```bash
 curl -fsSL https://github.com/daveweinstein1/strix-halo-setup/releases/latest/download/strix-install -o /tmp/s && chmod +x /tmp/s && sudo /tmp/s
 ```
 
-**Options:** `--tui` (terminal) | `--web` (browser) | `--menu` (select stages)
+**Options:** `--tui` (terminal) | `--web` (browser) | `--manual` (select stages) | `--auto` (no prompts)
 
 ---
 
@@ -142,30 +127,20 @@ AI and development tools are **bleeding edge** — ROCm, PyTorch, and AI coding 
 
 ## License
 
-**[PolyForm Strict 1.0.0](LICENSE.md)**
+**[Proprietary - Pre-Release](LICENSE.md)**
 
-### Why This License?
+This software is currently under development and **not yet licensed for any use**.
 
-We chose the [PolyForm Strict License](https://polyformproject.org/licenses/strict/1.0.0/) because:
+- ❌ No permission to use, copy, modify, or distribute
+- ❌ No warranties or guarantees
+- ✅ Will be released under Apache 2.0 at v1.0
 
-1. **Clear terms** — Written by lawyers specifically for source-available software
-2. **Personal use allowed** — You can use this for your own projects, learning, research
-3. **Commercial use blocked** — Prevents unauthorized commercial exploitation
-4. **Future flexibility** — We can grant additional rights without changing the license
+**Why this placeholder?**  
+We're finalizing v1.0 before releasing under Apache 2.0. This prevents premature forks of incomplete code.
 
-### What's Allowed
+**ETA:** Apache 2.0 license coming with v1.0 release (January 2026)
 
-- ✅ Personal/noncommercial use
-- ✅ Private study, hobby projects, experimentation
-- ❌ Commercial use (requires separate license)
-- ❌ Government and nonprofit use (requires permission)
-- ❌ Redistribution (requires permission)
-
-### Commercial Licensing
-
-**Hardware manufacturers & system integrators:** Interested in bundling this installer with your Strix Halo products? We're open to partnership discussions and commercial licensing arrangements.
-
-👉 [Open an issue](https://github.com/daveweinstein1/strix-halo-setup/issues) with subject "Commercial License Inquiry"
+**Questions?** [Open an issue](https://github.com/daveweinstein1/strix-halo-setup/issues)
 
 ---
 
