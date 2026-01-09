@@ -1,0 +1,15 @@
+# Antigravity IDE local config
+.agent/
+.antigravity/
+
+# Go binaries
+strix-install
+strix-install.exe
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
