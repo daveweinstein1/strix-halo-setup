@@ -1,0 +1,26 @@
+# Minisforum MS-S1 Max Device Configuration
+# Strix Halo variant with some Linux issues
+
+device:
+  manufacturer: "Minisforum"
+  model: "MS-S1 Max"
+  cpu: "AMD Ryzen AI Max+ 395"
+
+quirks:
+  - id: ethernet-unreliable
+    type: advisory
+    description: "Onboard Ethernet may be unreliable. Consider using a USB Ethernet adapter."
+  
+  - id: usb4-display-issues
+    type: advisory
+    description: "USB4 display output may not work on Linux. Use HDMI instead."
+  
+  - id: fan-sleep-issues
+    type: advisory
+    description: "Fan may run loud during sleep. Check BIOS for sleep settings."
+
+notes:
+  - "Some users report Ethernet stopping during high GPU load."
+  - "USB4/Thunderbolt display connectivity has reported issues on Fedora/Arch."
+  - "HDMI output works reliably."
+  - "Check Minisforum forums for latest BIOS updates."

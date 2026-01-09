@@ -1,0 +1,17 @@
+# Framework Desktop Device Configuration
+# Strix Halo variant - well-supported on Linux
+
+device:
+  manufacturer: "Framework"
+  model: "Desktop"
+  cpu: "AMD Ryzen AI Max+ 300 Series"
+
+quirks:
+  - id: fan-noise-advisory
+    type: advisory
+    description: "At 140W TDP, fan noise is louder. Consider setting TDP to 110-120W in BIOS."
+
+notes:
+  - "Framework Desktop has excellent Linux support out of the box."
+  - "RAM is soldered but available in 32GB to 128GB configurations."
+  - "All components are well-documented and repairable."

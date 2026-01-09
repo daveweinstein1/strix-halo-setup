@@ -1,0 +1,135 @@
+# Strix Halo Platform Configuration
+# Used by the installer to define requirements and stages
+
+platform:
+  name: "AMD Strix Halo"
+  codename: "gfx1151"
+  description: "AMD Ryzen AI Max+ (Strix Halo) workstation configuration"
+
+requirements:
+  kernel:
+    minimum: "6.18"
+    reason: "AMDXDNA 2 NPU support and gfx1151 GPU fixes"
+  mesa:
+    minimum: "25.3"
+    reason: "Full RDNA 3.5 graphics support"
+  rocm:
+    minimum: "7.2"
+    reason: "Strix Halo GPU compute support (CES 2026)"
+  llvm:
+    minimum: "21"
+    reason: "Required for Mesa shader compilation"
+
+stages:
+  kernel:
+    enabled: true
+    optional: false
+    description: "Kernel configuration and device quirks"
+  
+  graphics:
+    enabled: true
+    optional: false
+    description: "Graphics stack (Mesa, Vulkan, LLVM)"
+  
+  system:
+    enabled: true
+    optional: false
+    description: "System update and essentials"
+  
+  lxd:
+    enabled: true
+    optional: false
+    description: "LXD containerization with GPU passthrough"
+  
+  cleanup:
+    enabled: true
+    optional: true
+    description: "Orphan and cache cleanup"
+  
+  validate:
+    enabled: true
+    optional: false
+    description: "System validation checks"
+  
+  apps:
+    enabled: true
+    optional: true
+    description: "Desktop applications"
+  
+  workspace:
+    enabled: true
+    optional: true
+    description: "AI and development containers"
+
+packages:
+  graphics:
+    - mesa
+    - lib32-mesa
+    - mesa-utils
+    - vulkan-radeon
+    - lib32-vulkan-radeon
+    - vulkan-tools
+    - linux-firmware
+    - llvm
+    - lib32-llvm
+  
+  essentials:
+    - base-devel
+    - git
+    - wget
+    - curl
+    - vim
+    - neovim
+    - btop
+    - neofetch
+    - fastfetch
+  
+  containers:
+    - lxd
+  
+  browsers:
+    official:
+      - firefox
+    aur:
+      - google-chrome
+      - ungoogled-chromium-bin
+      - helium
+  
+  office:
+    aur:
+      - onlyoffice-bin
+  
+  media:
+    official:
+      - vlc
+      - signal-desktop
+
+containers:
+  ai-lab:
+    image: "images:archlinux/current"
+    packages:
+      - rocm-hip-sdk
+      - python-pytorch-rocm
+      - python-numpy
+      - python-pip
+      - git
+      - base-devel
+      - fastfetch
+      - vim
+    gpu: true
+  
+  dev-lab:
+    image: "images:archlinux/current"
+    packages:
+      - base-devel
+      - git
+      - rust
+      - go
+      - nodejs
+      - npm
+      - python
+      - python-pip
+      - vim
+      - neovim
+      - fastfetch
+    gpu: false

@@ -51,19 +51,6 @@ if confirm "Install Helium Browser?"; then
 fi
 
 # ----------------------------------------------------------------------------
-# Step 2: Development Tools
-# ----------------------------------------------------------------------------
-step 2 "Install Development Tools"
-
-if confirm_yes "Install Antigravity (IDE)?"; then
-    # Confirmed package name: antigravity-bin (AUR)
-    # Using -bin version for stability and speed
-    run_cmd "Installing Antigravity IDE" sudo -u "$REAL_USER" yay -S --needed --noconfirm antigravity-bin
-else
-    info "Skipping Antigravity."
-fi
-
-# ----------------------------------------------------------------------------
 # Step 3: Office Suite
 # ----------------------------------------------------------------------------
 step 3 "Install Office Suite"

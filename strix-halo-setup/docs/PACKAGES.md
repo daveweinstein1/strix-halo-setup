@@ -1,9 +1,9 @@
-# Complete Package Inventory
-*Strix Halo Post-Install Scripts - January 2026*
+# Package Inventory
+*Strix Halo Post-Install - January 2026*
 
-## Host System Packages
+## Host System
 
-### Stage 02: Graphics Stack
+### Graphics (Stage 02)
 ```
 mesa lib32-mesa mesa-utils
 vulkan-radeon lib32-vulkan-radeon vulkan-tools
@@ -11,40 +11,44 @@ linux-firmware
 llvm lib32-llvm
 ```
 
-### Stage 03: System Essentials
+### Essentials (Stage 03)
 ```
 base-devel git wget curl vim neovim btop neofetch fastfetch
 ```
 
-### Stage 04: Containers
+### Containers (Stage 04)
 ```
 lxd
 ```
 
-### Stage 07: User Applications
+### User Apps (Stage 07)
 
-**Official Repos (pacman):**
+**From official repos:**
 ```
 firefox signal-desktop vlc yay
 ```
 
-**AUR (yay):**
+**From AUR (installed using `yay` helper):**
 ```
-google-chrome ungoogled-chromium-bin helium
-antigravity-bin onlyoffice-bin
+google-chrome
+ungoogled-chromium-bin
+helium
+onlyoffice-bin
 ```
 
 ---
 
-## Container Packages
+## LXD Containers (Stage 08)
 
-### ai-lab (LXD Container)
+### ai-lab
+For AI/ML workloads with ROCm GPU acceleration:
 ```
 rocm-hip-sdk python-pytorch-rocm python-numpy python-pip
 git base-devel fastfetch vim
 ```
 
-### dev-lab (LXD Container)
+### dev-lab
+For general development:
 ```
 base-devel git rust go nodejs npm
 python python-pip vim neovim fastfetch
@@ -52,12 +56,7 @@ python python-pip vim neovim fastfetch
 
 ---
 
-## Summary Count
+## Notes
 
-| Category | Count |
-|----------|-------|
-| Host: Official Repos | 21 packages |
-| Host: AUR | 5 packages |
-| Container: ai-lab | 8 packages |
-| Container: dev-lab | 11 packages |
-| **Total** | **45 packages** |
+- **yay**: AUR helper tool that builds packages from the Arch User Repository
+- **Antigravity IDE**: Install manually or in dev-lab container as needed (not included by default)

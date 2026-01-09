@@ -1,0 +1,27 @@
+# Beelink GTR9 Pro Device Configuration
+# Strix Halo variant with Intel E610 Ethernet issues
+
+device:
+  manufacturer: "Beelink"
+  model: "GTR9 Pro"
+  cpu: "AMD Ryzen AI Max+ 395"
+
+quirks:
+  - id: e610-blacklist
+    type: auto
+    description: "Blacklist Intel E610 Ethernet driver (crashes under GPU load)"
+    action:
+      kernel_params:
+        - "modprobe.blacklist=ice"
+  
+  - id: tdp-tool
+    type: auto
+    description: "Install RyzenAdj for TDP control"
+    action:
+      aur_packages:
+        - ryzenadj
+
+notes:
+  - "The Intel E610 10GbE Ethernet controller may crash when GPU is under heavy load."
+  - "Workaround: Use WiFi or a USB Ethernet adapter."
+  - "Beelink may release BIOS updates to address this - check their support site."
