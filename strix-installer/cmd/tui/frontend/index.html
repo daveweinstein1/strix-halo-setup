@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Strix Halo Installer</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>🚀 Strix Halo Post-Installer</h1>
+            <p class="subtitle">AMD Ryzen AI Max+ (gfx1151) Configuration</p>
+        </header>
+
+        <section id="device-info" class="card">
+            <h2>📟 Detected Device</h2>
+            <p id="device-name">Detecting...</p>
+        </section>
+
+        <section id="stages" class="card">
+            <h2>📋 Installation Stages</h2>
+            <ul id="stage-list"></ul>
+        </section>
+
+        <section id="controls" class="card">
+            <button id="start-btn" class="primary-btn">▶ Start Installation</button>
+            <button id="tui-btn" class="secondary-btn">Switch to TUI Mode</button>
+        </section>
+
+        <section id="log" class="card hidden">
+            <h2>📜 Log</h2>
+            <pre id="log-output"></pre>
+        </section>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+
+</html>
