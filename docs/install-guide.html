@@ -1,0 +1,1168 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CachyOS Installation Guide: Strix Halo</title>
+    <style>
+        :root {
+            --primary-color: #004d40;
+            --secondary-color: #00695c;
+            --accent-color: #26a69a;
+            --text-color: #333;
+            --bg-color: #f4f6f8;
+            --card-bg: #ffffff;
+            --border-color: #e0e0e0;
+            --code-bg: #2d3436;
+            --code-text: #dfe6e9;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            padding: 40px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+
+        /* Header Styles */
+        header {
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        h1 {
+            margin: 0;
+            color: var(--primary-color);
+            font-size: 2.2rem;
+        }
+
+        .meta {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        /* Typography */
+        h2 {
+            color: var(--secondary-color);
+            border-left: 5px solid var(--accent-color);
+            padding-left: 15px;
+            margin-top: 40px;
+            margin-bottom: 20px;
+        }
+
+        h3 {
+            color: var(--text-color);
+            font-weight: 600;
+            margin-top: 30px;
+        }
+
+        h4 {
+            color: #555;
+            font-weight: 600;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+
+        /* Tables */
+        .table-responsive {
+            overflow-x: auto;
+            margin: 20px 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.95rem;
+        }
+
+        th,
+        td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        tr:hover {
+            background-color: #fafafa;
+        }
+
+        /* Small Table Variant */
+        .table-small table {
+            font-size: 0.75rem;
+        }
+
+        .table-small th,
+        .table-small td {
+            padding: 6px 8px;
+        }
+
+        /* Code Blocks */
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-family: "JetBrains Mono", Consolas, monospace;
+            font-size: 0.9rem;
+        }
+
+        code {
+            background-color: #f0f2f5;
+            color: #d63031;
+            padding: 2px 5px;
+            border-radius: 4px;
+            font-family: "JetBrains Mono", Consolas, monospace;
+            font-size: 0.9em;
+        }
+
+        pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+        }
+
+        /* Print Button */
+        .btn-print {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: background 0.2s;
+        }
+
+        .btn-print:hover {
+            background-color: var(--secondary-color);
+        }
+
+        /* Info Boxes */
+        .alert {
+            padding: 15px;
+            border-radius: 6px;
+            margin: 15px 0;
+            border-left: 4px solid;
+        }
+
+        .alert-info {
+            background-color: #e3f2fd;
+            border-color: #2196f3;
+            color: #0d47a1;
+        }
+
+        .alert-warning {
+            background-color: #fff3e0;
+            border-color: #ff9800;
+            color: #e65100;
+        }
+
+        .alert-danger {
+            background-color: #ffebee;
+            border-color: #ef5350;
+            color: #c62828;
+        }
+
+        .alert-success {
+            background-color: #e8f5e9;
+            border-color: #66bb6a;
+            color: #1b5e20;
+        }
+
+        /* Mobile Adjustments */
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 1.8rem;
+            }
+
+            header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .btn-print {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        /* PRINT STYLES */
+        @media print {
+            body {
+                background: white;
+                color: black;
+                padding: 0;
+            }
+
+            .container {
+                box-shadow: none;
+                max-width: 100%;
+                width: 100%;
+                margin: 0;
+                padding: 0;
+                border: none;
+            }
+
+            .no-print,
+            .btn-print {
+                display: none !important;
+            }
+
+            h2 {
+                border-left: none;
+                border-bottom: 2px solid #000;
+                padding-left: 0;
+                color: black;
+                page-break-after: avoid;
+            }
+
+            table {
+                page-break-inside: auto;
+            }
+
+            tr {
+                page-break-inside: avoid;
+                page-break-after: auto;
+            }
+
+            pre,
+            .alert {
+                border: 1px solid #999;
+                background: none !important;
+                color: black !important;
+                page-break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <header>
+            <div>
+                <h1>CachyOS Installation Guide</h1>
+                <div class="meta">
+                    Target: <strong>Strix Halo</strong> | Version: 2026.01.09 | Author: Dave Weinstein
+                </div>
+            </div>
+            <button onclick="window.print()" class="btn-print">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M6 9V2h12v7"></path>
+                    <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+                    <path d="M6 14h12v8H6z"></path>
+                </svg>
+                Print Guide
+            </button>
+        </header>
+
+        <div class="overview">
+            <p>This guide covers installing CachyOS on Strix Halo hardware and running the post-install configuration
+                scripts. Please check the <strong>Hardware Compatibility Matrix</strong> below before beginning.</p>
+        </div>
+
+        <!-- MANUFACTURER MESSAGES -->
+        <div class="alert alert-danger">
+            <strong>Beelink GTR9 Pro Notice:</strong> The Intel E610 10GbE chip causes kernel panics on Linux 6.12+. You
+            MUST disable "Device 3 Fun 2" in BIOS or blacklist the `ice` driver.<br><br>
+            <strong>Note to Beelink:</strong> We bought and returned a GTR9 Pro due to the E610 problems (thanks for
+            being cool about that). We'd be happy to add support for version 2 hardware when you're ready. If you want
+            us to do so please reach out to us for validation.
+        </div>
+
+        <div class="alert alert-success">
+            <strong>Framework Desktop:</strong> No known significant issues.<br><br>
+            <strong>Our Setup:</strong> Our current test machine uses a Framework 128GB motherboard (but isn't in the
+            Framework case).<br>
+            <strong>To Framework:</strong> If you'd like us to verify the 32GB or 64GB versions (or a clustering setup
+            like we've seen on several influencer channels) please reach out to us.
+        </div>
+
+        <div class="alert alert-info">
+            <strong>Minisforum Notice:</strong> The MS-S1 MAX is shipping but requires kernel tweaks for USB4 stability.
+            We have not tested this unit. The N5 MAX was announced at CES2026, and is yet to ship.
+        </div>
+
+        <p style="margin-top: 20px; color: #333;">
+            If you're a manufacturer that isn't listed, please don't take it personally, check to see if you're listed
+            in Appendix A, and please reach out to us so we can add support for your devices.
+        </p>
+
+        <h2>Part 1: CachyOS Installation</h2>
+
+        <h3>Requirements</h3>
+        <ul>
+            <li>USB drive (16GB+)</li>
+            <li>Strix Halo hardware</li>
+            <li>Active Internet connection</li>
+        </ul>
+
+        <h3>Step 1: Create Bootable USB</h3>
+        <div class="alert alert-info">
+            <strong>Option A: Ventoy (Recommended)</strong>
+            <ol style="margin-bottom:0">
+                <li>Download <a href="https://www.ventoy.net/en/download.html">Ventoy</a></li>
+                <li>Install Ventoy to your USB drive</li>
+                <li>Copy the <a href="https://cachyos.org/download/">CachyOS ISO</a> directly to the USB drive partition
+                </li>
+            </ol>
+        </div>
+
+        <h3>Step 2: BIOS Configuration</h3>
+        <p><strong>Global Defaults (All Devices):</strong></p>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Setting</th>
+                        <th>Value</th>
+                        <th>Reason</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Secure Boot</td>
+                        <td><strong>Disabled</strong></td>
+                        <td>Required for CachyOS/Arch kernel modules</td>
+                    </tr>
+                    <tr>
+                        <td>Boot Mode</td>
+                        <td><strong>UEFI</strong></td>
+                        <td>Legacy/CSM not supported</td>
+                    </tr>
+                    <tr>
+                        <td>IOMMU</td>
+                        <td><strong>Enabled</strong></td>
+                        <td>Required for virtualization/containers</td>
+                    </tr>
+                    <tr>
+                        <td>SVM Mode</td>
+                        <td><strong>Enabled</strong></td>
+                        <td>Required for virtualization</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- MOVED HARDWARE MATRIX -->
+        <h3>Hardware Compatibility Matrix</h3>
+        <p>Apply these settings based on your specific device <strong>before</strong> proceeding to Step 3.</p>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Vendor / Model</th>
+                        <th>BIOS Action</th>
+                        <th>Kernel Parameter (GRUB)</th>
+                        <th>Known Issues</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Framework</strong><br>Mainboard</td>
+                        <td>VRAM: Auto</td>
+                        <td><em>None</em></td>
+                        <td>High fan noise in "Performance" mode.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Beelink</strong><br>GTR9 Pro</td>
+                        <td><strong>DISABLE</strong> PCIe Dev 3 Fun 2</td>
+                        <td><code>module_blacklist=ice</code></td>
+                        <td><strong>CRITICAL:</strong> 10GbE Driver Crash.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Minisforum</strong><br>MS-S1 Max</td>
+                        <td>Default</td>
+                        <td><code>pcie_port_pm=off</code></td>
+                        <td>Rear USB4 stability fix.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- BEELINK INSTRUCTIONS RED BOX -->
+        <div class="alert alert-danger">
+            <strong>CRITICAL BEELINK BIOS INSTRUCTIONS</strong><br>
+            To prevent random crashes on the Beelink GTR9 Pro, navigate to:<br>
+            <code>Advanced</code> &rarr; <code>Demo Board</code> &rarr; <code>PCI-E Port</code> &rarr;
+            <code>Device 3 Fun 2</code> &rarr; <strong>Disabled</strong>
+        </div>
+
+        <h3>Step 3: Install CachyOS</h3>
+        <ol>
+            <li>Boot from USB</li>
+            <li>Run Calamares installer (This will wipe the factory Windows 11 OS)</li>
+            <li><strong>Partitioning:</strong> Select BTRFS (critical for snapshots)</li>
+            <li><strong>Swap:</strong> Create swap partition (recommended: 32GB+)</li>
+            <li>Complete install & Reboot</li>
+        </ol>
+
+        <h2>Part 2: Post-Install Configuration</h2>
+
+        <h3>Quick Install</h3>
+        <p><strong>Option 1: Short URL (via Bootstrap)</strong></p>
+        <pre><code>curl -fsSL https://bit.ly/strix-halo | sudo bash</code></pre>
+        <p><em>This fetches <code>install.sh</code> from GitHub, which downloads the binary release to <code>/tmp</code>
+                and executes it. For a deep dive on exactly how this script works and the architecture behind it, please
+                read the <a href="https://github.com/daveweinstein1/strix-halo-setup">README on GitHub</a>.</em></p>
+
+        <p><strong>Option 2: Direct Binary Download</strong></p>
+        <pre><code>curl -fsSL https://github.com/daveweinstein1/strix-halo-setup/releases/latest/download/strix-install -o /tmp/s && chmod +x /tmp/s && sudo /tmp/s</code></pre>
+
+        <h3>Installer Options</h3>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Flag</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>(none)</code></td>
+                        <td>Auto-detects best UI (Web → TUI)</td>
+                    </tr>
+                    <tr>
+                        <td><code>--tui</code></td>
+                        <td>Forces Terminal UI</td>
+                    </tr>
+                    <tr>
+                        <td><code>--web</code></td>
+                        <td>Forces Web UI (localhost:8080)</td>
+                    </tr>
+                    <tr>
+                        <td><code>--auto</code></td>
+                        <td>Runs all stages without prompts</td>
+                    </tr>
+                    <tr>
+                        <td><code>--manual</code></td>
+                        <td>Interactive stage selection</td>
+                    </tr>
+                    <tr>
+                        <td><code>--marketplace</code></td>
+                        <td>Browse and install community containers</td>
+                    </tr>
+                    <tr>
+                        <td><code>--check-versions</code></td>
+                        <td>Verify package versions and exit</td>
+                    </tr>
+                    <tr>
+                        <td><code>--dry-run</code></td>
+                        <td>Simulate installation without changes</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3>Container Marketplace</h3>
+        <p>The installer includes a graphical browser for community-maintained container images optimized for Strix
+            Halo. Launch the marketplace to explore available toolboxes:</p>
+        <pre><code>strix-install --marketplace</code></pre>
+
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Source</th>
+                        <th>Description</th>
+                        <th>Example Images</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>kyuz0</strong></td>
+                        <td>Community Strix Halo toolboxes</td>
+                        <td>rocm-7rc, llama-vulkan, pytorch-2.5</td>
+                    </tr>
+                    <tr>
+                        <td><strong>AMD Official</strong></td>
+                        <td>AMD-maintained AI containers</td>
+                        <td>comfyui-rocm</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Community</strong></td>
+                        <td>Verified community contributions</td>
+                        <td>(Varies — see marketplace)</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="alert alert-info">
+            <strong>Usage:</strong> Select an image from the marketplace and install it into an existing LXD container
+            (e.g., <code>ai-lab</code> or <code>dev-lab</code>). The installer will execute
+            <code>lxc exec &lt;container&gt; -- toolbox create &lt;name&gt; --image &lt;url&gt;</code> for you.
+        </div>
+
+        <h3>What Gets Configured</h3>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Stage</th>
+                        <th>Actions Taken</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td style="white-space: nowrap;"><strong>1. Kernel</strong></td>
+                        <td>Adds <code>amd_iommu=on</code>, <code>iommu=pt</code>. Applies vendor-specific patches from
+                            Hardware Matrix. Blacklists <code>ice</code> driver on Beelink.</td>
+                    </tr>
+                    <tr>
+                        <td style="white-space: nowrap;"><strong>2. Graphics</strong></td>
+                        <td>Installs Mesa 25.3+, Vulkan, LLVM 21. Configures RADV.</td>
+                    </tr>
+                    <tr>
+                        <td style="white-space: nowrap;"><strong>3. System</strong></td>
+                        <td>Updates mirrors, installs <code>base-devel</code>, <code>git</code>, <code>btop</code>.</td>
+                    </tr>
+                    <tr>
+                        <td style="white-space: nowrap;"><strong>4. LXD</strong></td>
+                        <td>Installs LXD, configures current user, enables GPU passthrough.</td>
+                    </tr>
+                    <tr>
+                        <td style="white-space: nowrap;"><strong>5. Thermal</strong></td>
+                        <td>Installs <code>lm_sensors</code>, <code>fancontrol</code>. Runs sensor detection.
+                            <strong>Disables ZRAM</strong> on systems with ≥64GB RAM to prevent GTT memory conflicts.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="white-space: nowrap;"><strong>6. Cleanup</strong></td>
+                        <td>Removes orphans, clears distinct package caches.</td>
+                    </tr>
+                    <tr>
+                        <td style="white-space: nowrap;"><strong>7. Validate</strong></td>
+                        <td>Checks <code>glxinfo</code>, <code>vulkaninfo</code>, container health.</td>
+                    </tr>
+                    <tr>
+                        <td style="white-space: nowrap;"><strong>8. Apps</strong></td>
+                        <td>Optional: Firefox, VLC, Signal, coding tools.</td>
+                    </tr>
+                    <tr>
+                        <td style="white-space: nowrap;"><strong>9. Workspaces</strong></td>
+                        <td>Optional: Creates <code>ai-lab</code> (ROCm) and <code>dev-lab</code> containers.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h2>Package Inventory</h2>
+
+        <p>This is the software stack I personally use. If you need different IDEs or office tools, please install them
+            manually. The "Extra Browsers" are included to make it easy to maintain separate "Logged In" states.</p>
+
+        <h3>Graphics Stack (Stage 2)</h3>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Package</th>
+                        <th>Version</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>mesa</code></td>
+                        <td>25.3.0</td>
+                        <td>Open-source OpenGL/Vulkan for AMD</td>
+                    </tr>
+                    <tr>
+                        <td><code>lib32-mesa</code></td>
+                        <td>25.3.0</td>
+                        <td>32-bit libs for Wine/Gaming</td>
+                    </tr>
+                    <tr>
+                        <td><code>mesa-utils</code></td>
+                        <td>9.0.0</td>
+                        <td>Mesa utilities (glxinfo)</td>
+                    </tr>
+                    <tr>
+                        <td><code>vulkan-radeon</code></td>
+                        <td>25.3.0</td>
+                        <td>Vulkan driver for RDNA3</td>
+                    </tr>
+                    <tr>
+                        <td><code>lib32-vulkan-radeon</code></td>
+                        <td>25.3.0</td>
+                        <td>32-bit Vulkan driver</td>
+                    </tr>
+                    <tr>
+                        <td><code>vulkan-tools</code></td>
+                        <td>1.3.290</td>
+                        <td>Vulkan utilities (vulkaninfo)</td>
+                    </tr>
+                    <tr>
+                        <td><code>linux-firmware</code></td>
+                        <td>20250108</td>
+                        <td>Firmware files for AMD GPUs</td>
+                    </tr>
+                    <tr>
+                        <td><code>llvm</code></td>
+                        <td>21.0.0</td>
+                        <td>Compiler infrastructure for Mesa</td>
+                    </tr>
+                    <tr>
+                        <td><code>lib32-llvm</code></td>
+                        <td>21.0.0</td>
+                        <td>32-bit LLVM libraries</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3>System Essentials (Stage 3)</h3>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Package</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>base-devel</code></td>
+                        <td>Build tools (gcc, make)</td>
+                    </tr>
+                    <tr>
+                        <td><code>git</code></td>
+                        <td>Version control</td>
+                    </tr>
+                    <tr>
+                        <td><code>wget</code> / <code>curl</code></td>
+                        <td>Network downloaders</td>
+                    </tr>
+                    <tr>
+                        <td><code>vim</code> / <code>neovim</code></td>
+                        <td>Text editors</td>
+                    </tr>
+                    <tr>
+                        <td><code>btop</code></td>
+                        <td>Resource monitor</td>
+                    </tr>
+                    <tr>
+                        <td><code>fastfetch</code></td>
+                        <td>System info tool</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3>Containerization (Stage 4)</h3>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Package</th>
+                        <th>Version</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>lxd</code></td>
+                        <td>6.2</td>
+                        <td>System container and VM manager</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3>Fan & Thermal Control (Stage 5)</h3>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Package</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>lm_sensors</code></td>
+                        <td>Hardware monitoring tools</td>
+                    </tr>
+                    <tr>
+                        <td><code>fancontrol</code></td>
+                        <td>Fan speed control daemon</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3>Desktop Applications (Stage 7) — Optional</h3>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Package</th>
+                        <th>Source</th>
+                        <th>Why include it?</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>firefox</code></td>
+                        <td>Extra</td>
+                        <td>Primary privacy-focused browser.</td>
+                    </tr>
+                    <tr>
+                        <td><code>google-chrome</code></td>
+                        <td>AUR</td>
+                        <td>Standard web testing.</td>
+                    </tr>
+                    <tr>
+                        <td><code>ungoogled-chromium</code></td>
+                        <td>AUR</td>
+                        <td><strong>Dev Tool:</strong> Useful for testing apps without Google services tracking.</td>
+                    </tr>
+                    <tr>
+                        <td><code>helium</code></td>
+                        <td>AUR</td>
+                        <td><strong>Dev Tool:</strong> Minimal browser for quick lookups.</td>
+                    </tr>
+                    <tr>
+                        <td><code>onlyoffice-bin</code></td>
+                        <td>AUR</td>
+                        <td>Microsoft Office compatible suite.</td>
+                    </tr>
+                    <tr>
+                        <td><code>signal-desktop</code></td>
+                        <td>Extra</td>
+                        <td>Encrypted messaging.</td>
+                    </tr>
+                    <tr>
+                        <td><code>vlc</code></td>
+                        <td>Extra</td>
+                        <td>Media player.</td>
+                    </tr>
+                    <tr>
+                        <td><code>yay</code></td>
+                        <td>AUR Helper</td>
+                        <td>Community package installer.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="alert alert-info" style="margin-top: 20px;">
+            <strong>Why so many browsers?</strong><br>
+            We include standard Chrome, Ungoogled Chromium, and Helium to allow developers to maintain distinct
+            "logged-in" states (e.g., Personal, Work, Testing) simultaneously. This prevents the friction of constantly
+            logging in and out when debugging web applications that require authentication.
+        </div>
+
+        <h3>LXD Containers (Stage 8) — Optional</h3>
+        <div class="alert alert-info">
+            <strong>Why Containers?</strong> These isolate your development environments from your stable OS. If you
+            break an AI library in <code>ai-lab</code>, your main system remains clean.
+        </div>
+
+        <h4>ai-lab (ROCm AI Workloads)</h4>
+        <div class="table-responsive">
+            <table>
+                <tbody>
+                    <tr>
+                        <td><code>rocm-hip-sdk</code></td>
+                        <td>AMD ROCm HIP SDK 7.2.0</td>
+                    </tr>
+                    <tr>
+                        <td><code>python-pytorch-rocm</code></td>
+                        <td>PyTorch 2.5.1 with ROCm backend</td>
+                    </tr>
+                    <tr>
+                        <td><code>python-numpy</code></td>
+                        <td>Numerical computing</td>
+                    </tr>
+                    <tr>
+                        <td><code>python-pip</code></td>
+                        <td>Python package installer</td>
+                    </tr>
+                    <tr>
+                        <td><code>ollama</code></td>
+                        <td>Local LLM runner (Llama, Mistral)</td>
+                    </tr>
+                    <tr>
+                        <td><code>ComfyUI</code></td>
+                        <td>Stable Diffusion UI (via git clone)</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h4>dev-lab (General Coding)</h4>
+        <div class="table-responsive">
+            <table>
+                <tbody>
+                    <tr>
+                        <td><code>rust</code> / <code>go</code></td>
+                        <td>Language compilers</td>
+                    </tr>
+                    <tr>
+                        <td><code>nodejs</code> / <code>npm</code></td>
+                        <td>JS Runtime (v23.5.0)</td>
+                    </tr>
+                    <tr>
+                        <td><code>python</code></td>
+                        <td>Python 3.13.1</td>
+                    </tr>
+                    <tr>
+                        <td><code>base-devel</code></td>
+                        <td>Build tools</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3>Package Dependencies</h3>
+        <pre>
+Graphics Stack
+├── mesa ← requires llvm
+├── vulkan-radeon ← requires mesa
+└── lib32-* packages ← require 32-bit base libraries
+
+Containers
+├── lxd ← requires lxd group membership
+└── GPU passthrough ← requires graphics stack
+
+AUR Packages
+└── all ← require yay (or another AUR helper)
+
+ROCm/AI
+├── rocm-hip-sdk ← requires kernel 6.18+ with AMDGPU
+└── python-pytorch-rocm ← requires rocm-hip-sdk
+    </pre>
+
+        <h2>Troubleshooting</h2>
+
+        <h3>Connectivity</h3>
+        <p><strong>Ethernet keeps dropping (Beelink)</strong><br>
+            This is the E610 driver bug.<br>
+            <strong>Fix:</strong> Check BIOS settings (see Step 2). Ensure installer Stage 1 ran (blacklists
+            <code>ice</code>).<br>
+            <strong>Workaround:</strong> Use Wi-Fi or USB-C Ethernet dongle.
+        </p>
+
+        <p><strong>Wi-Fi slow/unstable</strong><br>
+            <strong>Fix:</strong> Disable power saving: <code>sudo iw dev wlan0 set power_save off</code>
+        </p>
+
+        <h3>Graphics / Display</h3>
+        <p><strong>Black screen on boot</strong><br>
+            <strong>Fix:</strong> Add <code>nomodeset</code> to kernel params in GRUB. Then run installer Stage 2.
+        </p>
+
+        <p><strong>Stuttering / Glitches</strong><br>
+            <strong>Fix:</strong> Ensure <code>xf86-video-amdgpu</code> is installed. Check
+            <code>dmesg | grep amdgpu</code> for firmware errors.<br>
+            <strong>Ref:</strong> <a href="https://wiki.archlinux.org/title/AMDGPU#Troubleshooting">Arch Wiki -
+                AMDGPU</a>
+        </p>
+
+        <h3>Virtualization</h3>
+        <p><strong>LXD "Permission Denied"</strong><br>
+            <strong>Fix:</strong> Log out and back in. Group membership (<code>lxd</code>) applies on next login.
+        </p>
+
+        <p><strong>VMs/Containers slow</strong><br>
+            <strong>Fix:</strong> Verify SVM is enabled in BIOS: <code>dmesg | grep -i svm</code> should show "SVM
+            enabled".
+        </p>
+
+        <h3>AI / ROCm</h3>
+        <p><strong>"HIP device not found"</strong><br>
+            <strong>Fix:</strong> The user likely needs to be added to the <code>video</code> and <code>render</code>
+            groups. Run this command:
+        </p>
+        <pre><code>sudo usermod -aG video,render $USER && echo "Please reboot for group changes to take effect."</code></pre>
+        <p><strong>Fix 2:</strong> Ensure <code>hsa-amd-aqlprofile-bin</code> is installed (handled by installer).</p>
+
+        <hr style="margin: 40px 0; border: 0; border-top: 1px solid var(--border-color);">
+
+        <h2>Technical Architecture</h2>
+        <p>For a deep dive on how the installer works, stage dependencies, and deployment flow, see the <a
+                href="ARCHITECTURE.md">Architecture Document</a>.</p>
+
+        <hr style="margin: 40px 0; border: 0; border-top: 1px solid var(--border-color);">
+
+        <h2>Appendix A: Complete Hardware Ecosystem</h2>
+
+        <div class="alert alert-info">
+            <strong>To Hardware Manufacturers:</strong><br>
+            We are actively developing the Linux support layer for this platform. If you have current or unreleased
+            hardware you would like supported/validated, please contact us via our GitHub Repository (open an Issue
+            titled "Vendor Outreach"). If your device is missing from this list (updated Jan 2026), please let us know
+            so we can add it.
+        </div>
+
+        <p>Comprehensive list of known Strix Halo devices as of January 2026. <strong>Note:</strong> All devices use
+            soldered LPDDR5X memory.</p>
+
+        <div class="table-responsive table-small">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Vendor</th>
+                        <th>Models & Form Factors</th>
+                        <th>Specs (CPU | Memory)</th>
+                        <th>Availability</th>
+                        <th>Shipped OS</th>
+                        <th>Known Issues / Quirks</th>
+                        <th>In Contact?</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Framework</strong></td>
+                        <td><strong>Framework Desktop</strong> (SFF Mainboard)</td>
+                        <td>Max+ 395 | 32/64/128GB</td>
+                        <td><strong>Backorder</strong> (Batch 17)</td>
+                        <td><strong>DIY (No OS)</strong></td>
+                        <td>Thermal throttling in laptop chassis (Desktop recommended)</td>
+                        <td><strong>No</strong><br><span style="font-size: 0.85em;">We have one</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Minisforum</strong></td>
+                        <td><strong>MS-S1 MAX</strong> (Mini Workstation)<br><strong>N5 MAX</strong> (NAS 5-Bay)</td>
+                        <td><strong>S1:</strong> Max+ 395 | 32/64/96/128GB<br><strong>N5:</strong> Max+ 395 |
+                            32/64/128GB</td>
+                        <td><strong>S1:</strong> <strong>Shipping</strong><br><strong>N5:</strong> Announced</td>
+                        <td><strong>Win 11</strong></td>
+                        <td><strong>S1:</strong> Rear USB4 requires kernel fix; OCuLink finicky<br><strong>N5:</strong>
+                        </td>
+                        <td><strong>No</strong></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Beelink</strong></td>
+                        <td><strong>GTR9 Pro</strong> (Mini PC)</td>
+                        <td>Max+ 395 | 32/64/128GB</td>
+                        <td><strong>Preorder</strong> (Mid-Jan)</td>
+                        <td><strong>Win 11</strong></td>
+                        <td><strong>Critical:</strong> Intel E610 10GbE crashes system on Linux</td>
+                        <td><strong>No</strong></td>
+                    </tr>
+                    <tr>
+                        <td><strong>HP</strong></td>
+                        <td><strong>ZBook Ultra 14 G1a</strong> (Laptop 14")<br><strong>Z2 Mini G1a</strong> (Mini PC)
+                        </td>
+                        <td><strong>ZBook:</strong> Max+ 395 | 32/64/96/128GB<br><strong>Z2 Mini:</strong> Max+ 395 |
+                            32/64/96/128GB</td>
+                        <td><strong>ZBook:</strong> <strong>Shipping</strong><br><strong>Z2 Mini:</strong> Shipping</td>
+                        <td><strong>Win 11 / Ubuntu 24.04</strong></td>
+                        <td></td>
+                        <td><strong>No</strong></td>
+                    </tr>
+                    <tr>
+                        <td><strong>ASUS</strong></td>
+                        <td><strong>ProArt PX13</strong> (Laptop 13")<br><strong>TUF Gaming A14</strong> (Laptop 14")
+                        </td>
+                        <td><strong>PX13:</strong> Max+ 395 | 32/64GB<br><strong>A14:</strong> Max+ 392 | 16/32/64GB
+                        </td>
+                        <td><strong>PX13:</strong> Announced<br><strong>A14:</strong> Announced</td>
+                        <td><strong>Win 11</strong></td>
+                        <td></td>
+                        <td><strong>No</strong></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Abee</strong></td>
+                        <td><strong>AI Station</strong> (Mini PC)</td>
+                        <td>Max+ 395 | Up to 128GB</td>
+                        <td><strong>Announced</strong></td>
+                        <td><strong>Win 11</strong></td>
+                        <td><strong>Liquid Cooled;</strong> Internal 400W PSU</td>
+                        <td><strong>No</strong></td>
+                    </tr>
+                    <tr>
+                        <td><strong>NIMO</strong></td>
+                        <td><strong>AI Mini PC</strong></td>
+                        <td>Max+ 395 | 128GB</td>
+                        <td><strong>Announced</strong></td>
+                        <td><strong>Win 11</strong></td>
+                        <td></td>
+                        <td><strong>No</strong></td>
+                    </tr>
+                    <tr>
+                        <td><strong>FAVM</strong></td>
+                        <td><strong>FA-EX9</strong> (Mini PC)</td>
+                        <td>Max+ 395 | 128GB</td>
+                        <td><strong>Shipping</strong></td>
+                        <td><strong>Win 11</strong></td>
+                        <td>Features OCuLink</td>
+                        <td><strong>No</strong></td>
+                    </tr>
+                    <tr>
+                        <td><strong>MINIX</strong></td>
+                        <td><strong>Elite ER939-AI</strong> (Mini PC)</td>
+                        <td>Max+ 395 | Up to 128GB</td>
+                        <td><strong>Announced</strong></td>
+                        <td><strong>Win 11</strong></td>
+                        <td>Compact 2.75L chassis</td>
+                        <td><strong>No</strong></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Thermaltake</strong></td>
+                        <td><strong>Desktop Mini</strong> (Mini PC)</td>
+                        <td>Max+ 395 | Up to 128GB</td>
+                        <td><strong>Announced</strong></td>
+                        <td><strong>Win 11</strong></td>
+                        <td>Hi-Fi style chassis with large LCD; <strong>Liquid Cooled</strong></td>
+                        <td><strong>No</strong></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Linglong</strong></td>
+                        <td><strong>Star Core</strong> (Mini PC)</td>
+                        <td>Max+ 395 | Up to 128GB</td>
+                        <td><strong>China Only</strong></td>
+                        <td><strong>Win 11</strong></td>
+                        <td>Xiaomi ecosystem product</td>
+                        <td><strong>No</strong></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Aokzoe</strong></td>
+                        <td><strong>AI Mini PC</strong></td>
+                        <td>Max+ 395 | Up to 128GB</td>
+                        <td><strong>Announced</strong></td>
+                        <td><strong>Win 11</strong></td>
+                        <td>Performance button on chassis</td>
+                        <td><strong>No</strong></td>
+                    </tr>
+                    <tr>
+                        <td><strong>AOOSTAR</strong></td>
+                        <td><strong>NEX395</strong> (Mini PC)</td>
+                        <td>Max+ 395 | 32/64/128GB</td>
+                        <td><strong>Announced</strong></td>
+                        <td><strong>Win 11</strong></td>
+                        <td></td>
+                        <td><strong>No</strong></td>
+                    </tr>
+                    <tr>
+                        <td><strong>GMKtec</strong></td>
+                        <td><strong>EVO-X2</strong> (Mini PC)</td>
+                        <td>Max+ 395 | 32/64/96/128GB</td>
+                        <td><strong>Shipping</strong></td>
+                        <td><strong>Win 11</strong></td>
+                        <td>Severe fan noise; Thermal throttling reported</td>
+                        <td><strong>No</strong></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Colorful</strong></td>
+                        <td><strong>Smart 900</strong> (Mini PC)</td>
+                        <td>Max+ 395 | 96GB</td>
+                        <td><strong>Announced</strong></td>
+                        <td><strong>Win 11</strong></td>
+                        <td></td>
+                        <td><strong>No</strong></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Corsair</strong></td>
+                        <td><strong>AI Workstation 300</strong> (Mini PC)</td>
+                        <td>Max+ 395 | 64/128GB</td>
+                        <td><strong>Shipping</strong></td>
+                        <td><strong>Win 11 Home</strong></td>
+                        <td>Proprietary AI software stack is <strong>Windows Only</strong>; Premium pricing</td>
+                        <td><strong>No</strong></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Geekom</strong></td>
+                        <td><strong>A9 Mega</strong> (Mini PC)</td>
+                        <td>Max+ 395 | 32/64/128GB</td>
+                        <td><strong>Backorder</strong></td>
+                        <td><strong>Win 11</strong></td>
+                        <td></td>
+                        <td><strong>No</strong></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Bosgame</strong></td>
+                        <td><strong>M5 AI</strong> (Mini PC)</td>
+                        <td>Max+ 395 | 32/64/128GB</td>
+                        <td><strong>Shipping</strong></td>
+                        <td><strong>Win 11</strong></td>
+                        <td>Verify cooling before buy</td>
+                        <td><strong>No</strong></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Peladn</strong></td>
+                        <td><strong>YO1</strong> (Mini PC)</td>
+                        <td>Max+ 395 | 32/64/128GB</td>
+                        <td><strong>Announced</strong></td>
+                        <td><strong>Win 11</strong></td>
+                        <td></td>
+                        <td><strong>No</strong></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Acemagic</strong></td>
+                        <td><strong>Tank M1A Pro+</strong> (Mini PC)</td>
+                        <td>Max+ 395 | 32/64/128GB</td>
+                        <td><strong>Preorder</strong></td>
+                        <td><strong>Win 11</strong></td>
+                        <td></td>
+                        <td><strong>No</strong></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Sixunited</strong></td>
+                        <td><strong>XN77-160M-CS</strong> (Laptop 16")<br><strong>AX835/AXB35</strong> (Mini PC)</td>
+                        <td>Max+ 395 | 32/64/128GB</td>
+                        <td><strong>China Only</strong></td>
+                        <td><strong>Win 11</strong></td>
+                        <td>China-market focus</td>
+                        <td><strong>No</strong></td>
+                    </tr>
+                    <tr>
+                        <td><strong>LCFC</strong></td>
+                        <td><strong>AI Mini PC</strong> (Mini PC)</td>
+                        <td>Max+ 395 | 32/64/128GB</td>
+                        <td><strong>China Only</strong></td>
+                        <td><strong>Win 11</strong></td>
+                        <td>Lenovo ODM (China only)</td>
+                        <td><strong>No</strong></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+</body>
+
+</html>
