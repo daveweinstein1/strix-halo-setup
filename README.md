@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/logo.png" alt="Strix Halo Installer" width="120">
+  <img src="strix-halo-setup/assets/logo.png" alt="Strix Halo Installer" width="120">
 </p>
 
 <h1 align="center">Strix Halo Post-Installer</h1>
@@ -30,12 +30,14 @@
 
 <p align="center">
   <strong>Terminal (TUI)</strong><br>
-  <img src="strix-halo-setup/assets/tui-screenshot.png" alt="TUI Screenshot" width="500">
+  <img src="strix-halo-setup/assets/tui-screenshot.png" alt="TUI Screenshot" width="500"><br>
+  <em>Simulated screenshot — actual UI coming soon</em>
 </p>
 
 <p align="center">
   <strong>Web UI (Browser)</strong><br>
-  <img src="strix-halo-setup/assets/gui-screenshot.png" alt="GUI Screenshot" width="500">
+  <img src="strix-halo-setup/assets/gui-screenshot.png" alt="GUI Screenshot" width="500"><br>
+  <em>Simulated screenshot — actual UI coming soon</em>
 </p>
 
 ---
