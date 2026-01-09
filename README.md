@@ -5,7 +5,7 @@
 <h1 align="center">Strixforge</h1>
 
 <p align="center">
-  <strong>Automated setup for AMD Strix Halo (gfx1151) workstations on CachyOS</strong>
+  <strong>Forge your Strix Halo into a Professional-Grade AI Workstation.</strong>
 </p>
 
 <p align="center">
@@ -47,21 +47,75 @@
 
 ---
 
-## ✨ Container Hub
+## The Container Hub
 
-Browse and install community containers from multiple sources directly in the installer:
+Strixforge includes a curated "Container Hub" that allows you to pull pre-built, optimized environments directly into your LXD setup.
 
-- **kyuz0**: Strix Halo optimized toolboxes (ROCm, LLaMA, PyTorch)
-- **AMD Official**: AI frameworks (ComfyUI + ROCm)
-- **Community**: Verified contributions
+**Launch the Hub:**
+```bash
+strixforge --hub
+```
 
-**Launch:** `strixforge --hub`
+**Available Sources:**
+* **kyuz0:** Highly optimized Strix Halo toolboxes (ROCm-7rc, LLaMA-Vulkan, PyTorch-2.5).
+* **AMD Official:** Standard AMD-maintained AI containers (ComfyUI-ROCm).
+* **Community:** Verified contributions for specific workflows.
 
-The hub integrates with your LXD environment, allowing you to install pre-configured containers into `ai-lab`, `dev-lab`, or custom instances with a single command.
+## Documentation & Deep Dives
 
+We have written detailed guides to help you understand the architecture and get the most out of your hardware.
+
+* **[The Unified Memory Advantage](doc/unified_memory_advantage.md)**, Why Strix Halo allows you to run models that even an RTX 4090 cannot touch.
+* **[Zero-Risk Architecture: Understanding LXD](doc/lxd_architecture.md)**, How we use containers to isolate the fragile AI stack from your stable OS.
+* **[Supported Hardware & Known Quirks](doc/hardware_quirks.md)**, Specific notes for Framework, Minisforum, and Beelink users.
+* **[Benchmarks vs. Reality](doc/real_world_benchmarks.md)**, Moving past TFLOPS to measure real-world compile times and tokens/sec.
+* **[Community Recipes](doc/community_recipes.md)**, Verified stacks for Oobabooga, ComfyUI, and more.
+* **[Full Installation Guide](doc/install_guide.html)**, A step-by-step HTML guide for printing.
 ---
 
-## Installation Guide
+## Why Containers?
+
+AI and development tools are **bleeding edge** — ROCm, PyTorch, and AI coding assistants update frequently with breaking changes. We isolate these in LXD containers so:
+
+- **Host stays stable** — Container breakage can't brick your system
+- **Instant rollback** — Restore snapshots when experiments fail
+- **Fresh starts** — Delete and recreate containers in minutes
+
+📖 Full details: [Container Strategy](docs/CONTAINER_STRATEGY.md)
+
+## The Origin Story
+
+The name **Strixforge** wasn't chosen by accident. In ancient mythology, the *Strix* was a bird of ill omen, a screeching owl that brought terror in the night. When we first got our hands on the AMD Strix Halo hardware, that's exactly what it felt like. The hardware was a beast, massive unified memory, incredible potential, but the software stack was a nightmare of broken dependencies, kernel panics, and fragmented documentation. It screeched at us every time we tried to run a simple inference, "GGGGGGGGG....", over and over. ;-)
+
+We built this project to silence the screeching. We built it to take the raw, chaotic potential of the "Strix Halo" APU and put it through the Forge, hammering out the imperfections, taming the drivers, and sharpening the software stack until it became a precise, reliable tool.
+
+## Why We Built This
+
+Just a few months ago, the drivers and core libraries were so disjointed that even a seasoned software engineer would give up after a week of frustration and go shopping for a DGX Spark. While there has been significant effort from AMD and others to get the low-level "plumbing" working, the reality on the ground is still a dependency nightmare.
+
+**Strixforge simplifies this chaos in two specific ways:**
+
+1.  **Automated Configuration:** It handles the tedious configuration and installation of all the base packages you need on the host. It applies critical kernel patches (like the Beelink E610 fix) automatically.
+2.  **Containerized Safety:** It sets up LXD containers that allow you to leverage the work of elite developers (like `kyuz0`) or to experiment with bleeding-edge software. We help you simple spin up a container so you can safely try out a new app or technology without putting your development machine at risk. If it makes a mess inside the container, your host system remains pristine.
+
+### Who This Is For
+This is for the **"People in the Middle."**
+
+You are a developer, a data scientist, or a power user. You know what a tensor is, and you know why you want local inference. But you **don't** want to be a Linux kernel maintainer.
+* You want to write code, not debug `make` files.
+* You want to run Llama 3 70B, not re-compile LLVM.
+* You want the power of Linux without the "Linux tax" on your time.
+
+## Quick Start
+
+**Prerequisites:**
+* A machine with an AMD Strix Halo (Ryzen AI Max+) processor.
+* A fresh installation of **CachyOS** (recommended) or Arch Linux. (more tested Linux distros coming soon!)
+* Secure Boot disabled in BIOS.
+
+**Installation:**
+Run this single command to download and launch the installer:
+
 
 📖 **[Online Installation Guide](https://daveweinstein1.github.io/strixforge/install-guide.html)** (Recommended)
 
@@ -95,11 +149,12 @@ curl -fsSL https://github.com/daveweinstein1/strixforge/releases/latest/download
 
 | Flag | Description |
 |------|-------------|
-| `--tui` | Force Terminal UI |
-| `--gui` | Force Native GUI |
-| `--hub` | Browse Container Hub |
-| `--manual` | Select specific stages |
-| `--auto` | Run all stages (no prompts) |
+| `(none)` | Auto-detects best UI (GUI, then fallback to TUI) |
+| `--tui` | Forces Terminal UI |
+| `--gui` | Forces Graphical UI (GUI window pops up on localhost) |
+| `--auto` | Runs all stages without prompts (Unattended) |
+| `--manual` | Interactive stage selection |
+| `--hub` | Browse and install community containers (Container Hub) |
 | `--check-versions` | Verify package versions |
 | `--dry-run` | Simulate without changes |
 
@@ -120,18 +175,6 @@ curl -fsSL https://github.com/daveweinstein1/strixforge/releases/latest/download
 | Validation | Verify kernel, GPU, LXD |
 | Desktop Apps | Browsers, Office (optional) |
 | Workspaces | `ai-lab`, `dev-lab` containers (optional) |
-
----
-
-## Why Containers?
-
-AI and development tools are **bleeding edge** — ROCm, PyTorch, and AI coding assistants update frequently with breaking changes. We isolate these in LXD containers so:
-
-- **Host stays stable** — Container breakage can't brick your system
-- **Instant rollback** — Restore snapshots when experiments fail
-- **Fresh starts** — Delete and recreate containers in minutes
-
-📖 Full details: [Container Strategy](docs/CONTAINER_STRATEGY.md)
 
 ---
 
