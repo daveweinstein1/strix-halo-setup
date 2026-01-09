@@ -3,6 +3,7 @@ package stages
 import (
 	"context"
 	"fmt"
+	"os"
 	"os/exec"
 	"regexp"
 	"strconv"
@@ -84,8 +85,30 @@ func (s *KernelStage) Run(ctx context.Context, ui core.UI) error {
 		}
 	}
 
-	// Step 5: Update GRUB
-	ui.Progress(80, "Updating GRUB configuration...")
+	// Step 5: ZRAM Optimization
+	ui.Progress(75, "Checking ZRAM config...")
+	ramGB, err := getTotalRAM()
+	if err == nil {
+		if ramGB >= 64 {
+			ui.Log(core.LogInfo, fmt.Sprintf("High memory system (%d GB) detected. Disabling ZRAM to prevent GTT conflicts.", ramGB))
+
+			// Disable ZRAM generator service
+			cmd := exec.CommandContext(ctx, "systemctl", "disable", "--now", "zram-generator@zram0.service")
+			if out, err := cmd.CombinedOutput(); err != nil {
+				// Don't fail if service doesn't exist, just log
+				ui.Log(core.LogWarn, fmt.Sprintf("Failed to disable ZRAM (might not be active): %v %s", err, string(out)))
+			} else {
+				ui.Log(core.LogInfo, "✓ ZRAM disabled")
+			}
+		} else {
+			ui.Log(core.LogInfo, fmt.Sprintf("System memory %d GB < 64GB. Keeping ZRAM enabled.", ramGB))
+		}
+	} else {
+		ui.Log(core.LogWarn, fmt.Sprintf("Could not determine system RAM: %v. Skipping ZRAM optimization.", err))
+	}
+
+	// Step 6: Update GRUB
+	ui.Progress(90, "Updating GRUB configuration...")
 	if err := grub.UpdateGrub(ctx); err != nil {
 		return fmt.Errorf("failed to update GRUB: %v", err)
 	}
@@ -120,4 +143,28 @@ func parseVersion(version string) (int, int) {
 	major, _ := strconv.Atoi(matches[1])
 	minor, _ := strconv.Atoi(matches[2])
 	return major, minor
+}
+
+// getTotalRAM returns system RAM in GB
+func getTotalRAM() (int, error) {
+	data, err := os.ReadFile("/proc/meminfo")
+	if err != nil {
+		return 0, err
+	}
+
+	lines := strings.Split(string(data), "\n")
+	for _, line := range lines {
+		if strings.HasPrefix(line, "MemTotal:") {
+			fields := strings.Fields(line)
+			if len(fields) >= 2 {
+				kb, err := strconv.Atoi(fields[1])
+				if err != nil {
+					return 0, err
+				}
+				// Convert kB to GB check
+				return kb / 1024 / 1024, nil
+			}
+		}
+	}
+	return 0, fmt.Errorf("MemTotal not found in /proc/meminfo")
 }

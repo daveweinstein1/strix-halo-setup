@@ -204,27 +204,68 @@ Implemented in `cmd/tui/main.go`:
 - [ ] **Action:** `systemctl disable --now zram-generator@zram0.service`
 - [ ] **Integration:** Add to `thermal` or `system` stage
 
-### Phase 15: kyuz0 Container Marketplace 🚧
+### Phase 15: Multi-Source Container Marketplace 🚧
 
-**Goal:** Graphical browser for kyuz0's toolbox images, installing them into LXD.
+**Goal:** A unified graphical browser for discovering and installing LXD/Toolbox containers from multiple sources (kyuz0, AMD, Community).
 
-- [ ] **GHCR API Client:** Fetch image tags from `ghcr.io/kyuz0/amd-strix-halo-toolboxes`
-- [ ] **TUI Browser:** List view with scrolling and selection
-- [ ] **Web UI Card View:** Grid of available tools (LLaMA, ComfyUI, etc.)
-- [ ] **Install Action:** Execute `toolbox create` inside the `ai-lab` container
+#### 15.1 Registry Architecture
+**Config:** `configs/registries.yaml`
+```yaml
+registries:
+  - name: kyuz0
+    type: ghcr
+    url: ghcr.io/kyuz0/amd-strix-halo-toolboxes
+    description: "Community Strix Halo toolboxes"
+    priority: 100
 
-### Phase 16: Web UI Frontend 🚧
+  - name: amd-official
+    type: ghcr
+    url: ghcr.io/amd/comfyui-rocm
+    description: "AMD Official AI Containers"
+    priority: 90
 
-**Goal:** Create actual HTML/JS assets for the browser mode (currently loads blank).
+  - name: community
+    type: json
+    url: https://raw.githubusercontent.com/daveweinstein1/strix-halo-setup/main/community-registry.json
+    description: "Verified Community Contributions"
+    priority: 50
+```
 
-- [ ] **Frontend Assets:** Populate `frontend/` with `index.html`, `app.js`, `style.css`
-- [ ] **Progress Sync:** Implement WebSocket/SSE to pipe TUI events to Web UI
-- [ ] **Device Dashboard:** Show detected hardware and applied quirks
-- [ ] **Controls:** Pause/Resume, Stage toggles
+#### 15.2 Backend Components (`pkg/marketplace/`)
+- **`Registry` Interface:** Common interface for GHCR, JSON, and Local sources.
+- **`GHCRAdapter`:** Queries GitHub Container Registry API for tags and manifests.
+- **`JSONAdapter`:** Fetches and parses static JSON registry files.
+- **`Installer`:** Handles the `lxc exec ... toolbox create` logic.
 
-### Phase 17: Wails Native GUI (Cancelled) ❌
+#### 15.3 User Experience (TUI & GUI)
+- **Browser:** Tabbed view by registry source.
+- **Search:** Global filter by name, tag, or description.
+- **Details Panel:** Shows image size, last updated date, and description.
+- **Install Dialog:** Select target LXD container (e.g., `ai-lab`) and alias name.
 
-*Decision: Abandoned in favor of browser app mode to save development time and binary size.*
+#### 15.4 Work Checklist
+- [ ] Define `registries.yaml` structure
+- [ ] Implement `GHCRAdapter` (fetching tags from public GHCR)
+- [ ] Implement `JSONAdapter` (fetching community lists)
+- [ ] Create TUI Image Browser (Bubble Tea Model)
+- [ ] Create Wails/Web Bridge for Marketplace logic
+- [ ] Implement Install Orchestrator (download -> create -> verify)
+
+### Phase 16: Wails Native GUI 🚧
+
+**Goal:** Native desktop application using Wails (WebView2/WebKit).
+
+- [ ] **Add Wails dependency:** `wails.io/v2` in go.mod
+- [ ] **Create cmd/gui/main.go:** Wails entry point
+- [ ] **Frontend assets:** Reuse/build HTML/CSS/JS in `frontend/`
+- [ ] **Build integration:** `wails build` produces native binary
+
+### Phase 17: bit.ly Short URL (Last)
+
+**Goal:** Set up `bit.ly/strix-halo` redirect to install.sh.
+
+- [ ] Configure bit.ly redirect to raw GitHub script URL
+- [ ] Test one-liner: `curl -fsSL https://bit.ly/strix-halo | sudo bash`
 
 ---
 

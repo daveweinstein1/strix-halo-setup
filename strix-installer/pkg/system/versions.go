@@ -196,3 +196,85 @@ func SummarizeVersionChecks(checks []*VersionCheck) string {
 
 	return sb.String()
 }
+
+// =============================================================================
+// Phase 11: Pre-Install Version Verification
+// =============================================================================
+
+// CheckAllVersions checks all packages in ExpectedVersions map
+func CheckAllVersions(ctx context.Context) ([]*VersionCheck, error) {
+	checks := make([]*VersionCheck, 0, len(ExpectedVersions))
+
+	for pkg, expectedVer := range ExpectedVersions {
+		check, err := CheckPackageVersion(ctx, pkg, expectedVer)
+		if err != nil {
+			// Log but continue checking other packages
+			check = &VersionCheck{
+				Package:  pkg,
+				Expected: expectedVer,
+				Current:  "error",
+				Status:   VersionMissing,
+			}
+		}
+		checks = append(checks, check)
+	}
+
+	return checks, nil
+}
+
+// FormatVersionTable returns a formatted table of version checks
+func FormatVersionTable(checks []*VersionCheck) string {
+	var sb strings.Builder
+
+	// Header
+	sb.WriteString(fmt.Sprintf("%-20s %-15s %-15s %s\n", "Package", "Expected", "Installed", "Status"))
+	sb.WriteString(strings.Repeat("-", 60) + "\n")
+
+	// Sort by status (problems first)
+	sortedChecks := make([]*VersionCheck, len(checks))
+	copy(sortedChecks, checks)
+
+	// Simple sort: older/missing first, then OK/newer
+	for i := 0; i < len(sortedChecks); i++ {
+		for j := i + 1; j < len(sortedChecks); j++ {
+			if sortedChecks[j].Status > sortedChecks[i].Status {
+				sortedChecks[i], sortedChecks[j] = sortedChecks[j], sortedChecks[i]
+			}
+		}
+	}
+
+	for _, c := range sortedChecks {
+		current := c.Current
+		if len(current) > 15 {
+			current = current[:12] + "..."
+		}
+		expected := c.Expected
+		if len(expected) > 15 {
+			expected = expected[:12] + "..."
+		}
+		sb.WriteString(fmt.Sprintf("%-20s %-15s %-15s %s\n", c.Package, expected, current, c.Status.String()))
+	}
+
+	return sb.String()
+}
+
+// HasCriticalMismatches returns true if any package has older version
+func HasCriticalMismatches(checks []*VersionCheck) bool {
+	for _, c := range checks {
+		if c.Status == VersionOlder {
+			return true
+		}
+	}
+	return false
+}
+
+// GetMismatches returns only packages that need attention (older versions)
+func GetMismatches(checks []*VersionCheck) []*VersionCheck {
+	mismatches := make([]*VersionCheck, 0)
+	for _, c := range checks {
+		if c.Status == VersionOlder {
+			mismatches = append(mismatches, c)
+		}
+	}
+	return mismatches
+}

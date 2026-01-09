@@ -19,22 +19,47 @@ import (
 	"github.com/charmbracelet/lipgloss"
 
 	"github.com/daveweinstein1/strix-installer/pkg/core"
+	"github.com/daveweinstein1/strix-installer/pkg/marketplace"
 	"github.com/daveweinstein1/strix-installer/pkg/platform/strixhalo"
+	"github.com/daveweinstein1/strix-installer/pkg/system"
 )
 
 //go:embed frontend/*
 var frontendFS embed.FS
 
 var (
-	forceTUI = flag.Bool("tui", false, "Force TUI mode")
-	forceWeb = flag.Bool("web", false, "Force web mode (localhost + browser)")
+	forceTUI        = flag.Bool("tui", false, "Force TUI mode")
+	forceWeb        = flag.Bool("web", false, "Force web mode (localhost + browser)")
+	autoMode        = flag.Bool("auto", false, "Run all stages without prompts")
+	manualMode      = flag.Bool("manual", false, "Manually select stages to run")
+	marketplaceMode = flag.Bool("marketplace", false, "Open container marketplace")
+	checkVersions   = flag.Bool("check-versions", false, "Check package versions and exit")
+	dryRun          = flag.Bool("dry-run", false, "Simulate installation without changes")
 )
 
 func main() {
 	flag.Parse()
 
+	// Version check mode
+	if *checkVersions {
+		runVersionCheck()
+		return
+	}
+
+	// Auto mode: run without TUI/GUI
+	if *autoMode {
+		runAutoMode()
+		return
+	}
+
+	// Marketplace mode
+	if *marketplaceMode {
+		runMarketplace()
+		return
+	}
+
 	// Mode selection
-	if *forceTUI {
+	if *forceTUI || *manualMode {
 		runTUI()
 		return
 	}
@@ -50,6 +75,138 @@ func main() {
 	} else {
 		runTUI()
 	}
+}
+
+// runVersionCheck displays version comparison and exits
+func runVersionCheck() {
+	fmt.Println(titleStyle.Render("Strix Halo Version Check"))
+	fmt.Println()
+
+	ctx := context.Background()
+	checks, err := system.CheckAllVersions(ctx)
+	if err != nil {
+		fmt.Printf("Error checking versions: %v\n", err)
+		os.Exit(1)
+	}
+
+	fmt.Println(system.FormatVersionTable(checks))
+	fmt.Println()
+	fmt.Println(system.SummarizeVersionChecks(checks))
+
+	if system.HasCriticalMismatches(checks) {
+		fmt.Println(warnStyle.Render("⚠ Some packages have older versions than expected."))
+		fmt.Println("Run the installer to update, or use --auto to proceed anyway.")
+		os.Exit(1)
+	}
+
+	fmt.Println(successStyle.Render("✓ All versions look good!"))
+}
+
+// runAutoMode runs all stages without prompts
+func runAutoMode() {
+	fmt.Println(titleStyle.Render("Strix Halo Auto-Install"))
+	fmt.Println()
+
+	// Detect hardware
+	fmt.Println("Detecting hardware...")
+	device, err := platform.Detect()
+	if err != nil {
+		fmt.Printf("Warning: Could not detect device: %v\n", err)
+	} else {
+		fmt.Printf("Detected: %s\n", device.Name())
+	}
+	fmt.Println()
+
+	// Create UI adapter that auto-accepts
+	ui := &autoUIAdapter{dryRun: *dryRun}
+
+	// Run engine
+	ctx := context.Background()
+	engine := core.NewEngine(platform, ui)
+	if *dryRun {
+		engine.SetDryRun(true)
+		fmt.Println(warnStyle.Render("DRY RUN MODE - No changes will be made"))
+		fmt.Println()
+	}
+
+	err = engine.Run(ctx)
+	if err != nil {
+		fmt.Printf(errorStyle.Render("Installation failed: %v\n"), err)
+		os.Exit(1)
+	}
+
+	fmt.Println()
+	fmt.Println(successStyle.Render("✓ Installation complete!"))
+}
+
+// runMarketplace launches the TUI marketplace
+func runMarketplace() {
+	// Initialize manager
+	mgr := marketplace.NewManager()
+
+	// Load config (or use defaults if file missing)
+	if err := mgr.LoadConfigFromPath("configs/registries.yaml"); err != nil {
+		fmt.Printf("Warning: Could not load registries.yaml: %v. Using defaults.\n", err)
+		// TODO: Add default/hardcoded fallback if file missing
+	}
+
+	// Launch Bubble Tea program
+	p := tea.NewProgram(NewMarketplaceModel(mgr, 80, 24, func() {
+		// On Back, we exit for now
+		os.Exit(0)
+	}))
+
+	if _, err := p.Run(); err != nil {
+		fmt.Printf("Error running marketplace: %v\n", err)
+		os.Exit(1)
+	}
+}
+
+// autoUIAdapter implements UI interface for auto mode
+type autoUIAdapter struct {
+	dryRun bool
+}
+
+func (a *autoUIAdapter) StageStart(stage core.Stage) {
+	fmt.Printf("→ Starting: %s\n", stage.Name())
+}
+
+func (a *autoUIAdapter) StageComplete(result core.StageResult) {
+	if result.Status == core.StatusSuccess {
+		fmt.Printf(successStyle.Render("✓ Complete: %s\n"), result.StageName)
+	} else if result.Status == core.StatusFailed {
+		fmt.Printf(errorStyle.Render("✗ Failed: %s - %v\n"), result.StageName, result.Error)
+	} else if result.Status == core.StatusSkipped {
+		fmt.Printf("○ Skipped: %s\n", result.StageName)
+	}
+}
+
+func (a *autoUIAdapter) Progress(percent int, message string) {
+	fmt.Printf("  [%d%%] %s\n", percent, message)
+}
+
+func (a *autoUIAdapter) Log(level core.LogLevel, message string) {
+	switch level {
+	case core.LogError:
+		fmt.Println(errorStyle.Render(message))
+	case core.LogWarn:
+		fmt.Println(warnStyle.Render(message))
+	default:
+		fmt.Println(message)
+	}
+}
+
+func (a *autoUIAdapter) Confirm(message string, defaultYes bool) bool {
+	// Auto mode: always use default
+	return defaultYes
+}
+
+func (a *autoUIAdapter) Select(message string, options []string) int {
+	return 0
+}
+
+func (a *autoUIAdapter) Input(message string, defaultVal string) string {
+	return defaultVal
 }
 
 // runWebMode starts a local HTTP server and opens a browser

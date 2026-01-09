@@ -1,0 +1,18 @@
+registries:
+  - name: kyuz0
+    type: ghcr
+    url: ghcr.io/kyuz0/amd-strix-halo-toolboxes
+    description: "Community Strix Halo toolboxes (ROCm, LLaMA, PyTorch)"
+    priority: 100
+
+  - name: amd-official
+    type: ghcr
+    url: ghcr.io/amd/comfyui-rocm
+    description: "AMD Official AI Containers (ComfyUI)"
+    priority: 90
+
+  - name: community
+    type: json
+    url: https://raw.githubusercontent.com/daveweinstein1/strix-halo-setup/main/community-registry.json
+    description: "Verified Community Contributions"
+    priority: 50

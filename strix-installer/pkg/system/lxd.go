@@ -138,3 +138,130 @@ func (l *LXD) WaitForNetwork(ctx context.Context, name string) error {
 	}
 	return fmt.Errorf("container %s did not get network connectivity", name)
 }
+
+// =============================================================================
+// Phase 10: Container Lifecycle Management
+// =============================================================================
+
+// Snapshot represents an LXD container snapshot
+type Snapshot struct {
+	Name      string `json:"name"`
+	CreatedAt string `json:"created_at"`
+	Stateful  bool   `json:"stateful"`
+}
+
+// CreateSnapshot creates a snapshot of a container
+func (l *LXD) CreateSnapshot(ctx context.Context, container, snapshotName string) error {
+	result, err := Exec(ctx, "lxc", "snapshot", container, snapshotName)
+	if err != nil {
+		return fmt.Errorf("failed to create snapshot %s/%s: %s\n%s", container, snapshotName, err, result.Stderr)
+	}
+	return nil
+}
+
+// RestoreSnapshot restores a container to a previous snapshot
+func (l *LXD) RestoreSnapshot(ctx context.Context, container, snapshotName string) error {
+	result, err := Exec(ctx, "lxc", "restore", container, snapshotName)
+	if err != nil {
+		return fmt.Errorf("failed to restore snapshot %s/%s: %s\n%s", container, snapshotName, err, result.Stderr)
+	}
+	return nil
+}
+
+// DeleteSnapshot removes a snapshot from a container
+func (l *LXD) DeleteSnapshot(ctx context.Context, container, snapshotName string) error {
+	result, err := Exec(ctx, "lxc", "delete", fmt.Sprintf("%s/%s", container, snapshotName))
+	if err != nil {
+		return fmt.Errorf("failed to delete snapshot %s/%s: %s\n%s", container, snapshotName, err, result.Stderr)
+	}
+	return nil
+}
+
+// ListSnapshots returns all snapshots for a container
+func (l *LXD) ListSnapshots(ctx context.Context, container string) ([]Snapshot, error) {
+	result, err := Exec(ctx, "lxc", "info", container, "--format=json")
+	if err != nil {
+		return nil, fmt.Errorf("failed to get container info: %s", err)
+	}
+
+	var info struct {
+		Snapshots []Snapshot `json:"snapshots"`
+	}
+	if err := json.Unmarshal([]byte(result.Stdout), &info); err != nil {
+		return nil, err
+	}
+
+	return info.Snapshots, nil
+}
+
+// ContainerStatus represents the state of a container
+type ContainerStatus struct {
+	Name    string
+	Status  string // "Running", "Stopped", "Frozen"
+	Created string
+}
+
+// GetContainerStatus returns detailed status of a container
+func (l *LXD) GetContainerStatus(ctx context.Context, name string) (*ContainerStatus, error) {
+	result, err := Exec(ctx, "lxc", "info", name, "--format=json")
+	if err != nil {
+		return nil, fmt.Errorf("failed to get container status: %s", err)
+	}
+
+	var info struct {
+		Name      string `json:"name"`
+		Status    string `json:"status"`
+		CreatedAt string `json:"created_at"`
+	}
+	if err := json.Unmarshal([]byte(result.Stdout), &info); err != nil {
+		return nil, err
+	}
+
+	return &ContainerStatus{
+		Name:    info.Name,
+		Status:  info.Status,
+		Created: info.CreatedAt,
+	}, nil
+}
+
+// StopContainer stops a running container
+func (l *LXD) StopContainer(ctx context.Context, name string, force bool) error {
+	args := []string{"stop", name}
+	if force {
+		args = append(args, "--force")
+	}
+	result, err := Exec(ctx, "lxc", args...)
+	if err != nil {
+		return fmt.Errorf("failed to stop container %s: %s\n%s", name, err, result.Stderr)
+	}
+	return nil
+}
+
+// StartContainer starts a stopped container
+func (l *LXD) StartContainer(ctx context.Context, name string) error {
+	result, err := Exec(ctx, "lxc", "start", name)
+	if err != nil {
+		return fmt.Errorf("failed to start container %s: %s\n%s", name, err, result.Stderr)
+	}
+	return nil
+}
+
+// RecreateContainer deletes and recreates a container from image
+func (l *LXD) RecreateContainer(ctx context.Context, name, image string) error {
+	// Stop if running
+	status, err := l.GetContainerStatus(ctx, name)
+	if err == nil && status.Status == "Running" {
+		if err := l.StopContainer(ctx, name, true); err != nil {
+			return err
+		}
+	}
+
+	// Delete
+	if err := l.DeleteContainer(ctx, name, true); err != nil {
+		return err
+	}
+
+	// Create fresh
+	return l.CreateContainer(ctx, name, image)
+}
+
