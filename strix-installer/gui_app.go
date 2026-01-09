@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/daveweinstein1/strix-installer/pkg/marketplace"
+	"github.com/daveweinstein1/strix-installer/pkg/containerhub"
 	"github.com/daveweinstein1/strix-installer/pkg/platform/strixhalo"
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
@@ -12,12 +12,12 @@ import (
 // App struct
 type App struct {
 	ctx            context.Context
-	marketplaceMgr *marketplace.Manager
+	marketplaceMgr *containerhub.Manager
 }
 
 // NewApp creates a new App application struct
 func NewApp() *App {
-	mgr := marketplace.NewManager()
+	mgr := containerhub.NewManager()
 	// Ignore error for now, defaults used if file missing
 	_ = mgr.LoadConfigFromPath("configs/registries.yaml")
 
@@ -52,11 +52,11 @@ func (a *App) GetSystemStatus() map[string]string {
 }
 
 // FetchMarketplaceImages returns all available images from configured registries
-func (a *App) FetchMarketplaceImages() []marketplace.Image {
+func (a *App) FetchMarketplaceImages() []containerhub.Image {
 	images, err := a.marketplaceMgr.FetchAllImages(a.ctx)
 	if err != nil {
 		runtime.LogError(a.ctx, fmt.Sprintf("Failed to fetch images: %v", err))
-		return []marketplace.Image{}
+		return []containerhub.Image{}
 	}
 	return images
 }

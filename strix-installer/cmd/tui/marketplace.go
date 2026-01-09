@@ -8,13 +8,12 @@ import (
 	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-
-	"github.com/daveweinstein1/strix-installer/pkg/marketplace"
+	"github.com/daveweinstein1/strix-installer/pkg/containerhub"
 )
 
 // MarketplaceModel handles the UI for browsing and installing containers
 type MarketplaceModel struct {
-	manager   *marketplace.Manager
+	manager   *containerhub.Manager
 	list      list.Model
 	spinner   spinner.Model
 	isLoading bool
@@ -22,26 +21,26 @@ type MarketplaceModel struct {
 	width     int
 	height    int
 	onBack    func()
-	onInstall func(marketplace.Image, string) // image, tag
+	onInstall func(containerhub.Image, string) // image, tag
 
 	// Selection state
-	selectedImage *marketplace.Image
+	selectedImage *containerhub.Image
 	selectedTag   string
 	view          string // "list", "tags", "installing"
 }
 
 // Item wraps marketplace.Image for the list
 type item struct {
-	image marketplace.Image
+	image containerhub.Image
 }
 
 func (i item) Title() string       { return i.image.Name }
 func (i item) Description() string { return i.image.Description }
 func (i item) FilterValue() string { return i.image.Name }
 
-func NewMarketplaceModel(mgr *marketplace.Manager, width, height int, backFunc func()) MarketplaceModel {
+func NewMarketplaceModel(mgr *containerhub.Manager, width, height int, backFunc func()) MarketplaceModel {
 	l := list.New(nil, list.NewDefaultDelegate(), width, height-4)
-	l.Title = "Container Marketplace"
+	l.Title = "Container Hub"
 	l.SetShowHelp(false)
 	l.SetFilteringEnabled(true)
 
@@ -157,7 +156,7 @@ func (m MarketplaceModel) View() string {
 	}
 
 	if m.isLoading {
-		return fmt.Sprintf("\n %s Loading marketplace data...\n", m.spinner.View())
+		return fmt.Sprintf("\n %s Loading container hub data...\n", m.spinner.View())
 	}
 
 	if m.view == "list" {

@@ -18,8 +18,8 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 
+	"github.com/daveweinstein1/strix-installer/pkg/containerhub"
 	"github.com/daveweinstein1/strix-installer/pkg/core"
-	"github.com/daveweinstein1/strix-installer/pkg/marketplace"
 	"github.com/daveweinstein1/strix-installer/pkg/platform/strixhalo"
 	"github.com/daveweinstein1/strix-installer/pkg/system"
 )
@@ -32,7 +32,7 @@ var (
 	forceWeb        = flag.Bool("web", false, "Force web mode (localhost + browser)")
 	autoMode        = flag.Bool("auto", false, "Run all stages without prompts")
 	manualMode      = flag.Bool("manual", false, "Manually select stages to run")
-	marketplaceMode = flag.Bool("marketplace", false, "Open container marketplace")
+	marketplaceMode = flag.Bool("marketplace", false, "Browse Container Hub")
 	checkVersions   = flag.Bool("check-versions", false, "Check package versions and exit")
 	dryRun          = flag.Bool("dry-run", false, "Simulate installation without changes")
 )
@@ -142,7 +142,7 @@ func runAutoMode() {
 // runMarketplace launches the TUI marketplace
 func runMarketplace() {
 	// Initialize manager
-	mgr := marketplace.NewManager()
+	mgr := containerhub.NewManager()
 
 	// Load config (or use defaults if file missing)
 	if err := mgr.LoadConfigFromPath("configs/registries.yaml"); err != nil {
