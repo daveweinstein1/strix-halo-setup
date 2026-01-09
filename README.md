@@ -47,6 +47,20 @@
 
 ---
 
+## ✨ Container Marketplace
+
+Browse and install community toolboxes from multiple sources directly in the installer:
+
+- **kyuz0**: Strix Halo optimized containers (ROCm, LLaMA, PyTorch)
+- **AMD Official**: AI frameworks (ComfyUI + ROCm)
+- **Community**: Verified contributions
+
+**Launch:** `strix-install --marketplace`
+
+The marketplace integrates with your LXD containers, allowing you to install pre-configured environments into `ai-lab`, `dev-lab`, or custom containers with a single command.
+
+---
+
 ## Installation Guide
 
 📖 **[Online Installation Guide](https://daveweinstein1.github.io/strix-halo-setup/install-guide.html)** (Recommended)
@@ -77,7 +91,17 @@ View the full script: [install.sh](install.sh)
 curl -fsSL https://github.com/daveweinstein1/strix-halo-setup/releases/latest/download/strix-install -o /tmp/s && chmod +x /tmp/s && sudo /tmp/s
 ```
 
-**Options:** `--tui` (terminal) | `--web` (browser) | `--manual` (select stages) | `--auto` (no prompts)
+**Installer Options:**
+
+| Flag | Description |
+|------|-------------|
+| `--tui` | Force Terminal UI (Default) |
+| `--web` | Force Web UI (Browser) |
+| `--marketplace` | Browse container marketplace |
+| `--manual` | Select specific stages |
+| `--auto` | Run all stages (no prompts) |
+| `--check-versions` | Verify package versions |
+| `--dry-run` | Simulate without changes |
 
 ---
 
