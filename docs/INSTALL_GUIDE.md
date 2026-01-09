@@ -15,7 +15,7 @@ This guide covers:
 ### Requirements
 
 - USB drive (16GB+)
-- Strix Halo hardware (Framework Desktop, Beelink GTR9, Minisforum S1, etc.)
+- Strix Halo hardware
 - Internet connection
 
 ### Step 1: Create Bootable USB
@@ -25,113 +25,135 @@ This guide covers:
 2. Install to USB drive
 3. Copy [CachyOS ISO](https://cachyos.org/download/) to USB
 
-**Option B: Direct Write**
-```bash
-# Linux
-sudo dd if=cachyos-desktop-linux.iso of=/dev/sdX bs=4M status=progress
-
-# Windows
-# Use Rufus or balenaEtcher
-```
-
 ### Step 2: BIOS Configuration
 
-| Setting | Required Value |
-|---------|----------------|
-| Secure Boot | **Disabled** |
-| Boot Mode | **UEFI** |
-| IOMMU | **Enabled** |
-| SVM Mode | **Enabled** |
+**Global Defaults (All Devices):**
+| Setting | Value | Reason |
+|---------|-------|--------|
+| Secure Boot | **Disabled** | Required for CachyOS/Arch kernel modules |
+| Boot Mode | **UEFI** | Legacy/CSM not supported |
+| IOMMU | **Enabled** | Required for virtualization/containers |
+| SVM Mode | **Enabled** | Required for virtualization |
 
-**Beelink GTR9 Pro only:**
-- Disable E610 Ethernet: `Advanced` → `Demo Board` → `PCI-E Port` → `Device 3 Fun 2` → **Disabled**
+#### Device-Specific Settings
+
+**Beelink GTR9 Pro**
+*Known Issue: E610 10GbE causes crashes under load.*
+- **Action**: Disable problematic PCIe function
+- **Path**: `Advanced` → `Demo Board` → `PCI-E Port` → `Device 3 Fun 2` → **Disabled**
+- **Ref**: [Beelink Forum - E610 Crash](https://forum.bee-link.com/forum.php?mod=viewthread&tid=92415)
+
+**Framework Desktop**
+*Works out of the box, but verify these for optimal performance.*
+- **VRAM**: Leave at "Auto" (unified memory handles it best)
+- **Power**: "Balanced" is recommended; "Performance" may be loud
+- **Ref**: [r/framework Strix Halo Megathread](https://www.reddit.com/r/framework/comments/strix_halo_megathread)
+
+**Minisforum S1 Max**
+*Advisory: USB4/Ethernet edge cases.*
+- **VRAM**: Set minimum 1GB if using local LLMs (allows GTT expansion)
+- **USB4**: If rear ports unstable, kernel param `pcie_port_pm=off` may help
+- **Ref**: [Level1Techs - S1 Max Linux Review](https://forum.level1techs.com/t/minisforum-s1-max-linux/203941)
 
 ### Step 3: Install CachyOS
 
 1. Boot from USB
-2. Run the Calamares installer
-3. Select partitioning (BTRFS recommended)
-4. Complete installation
-5. Reboot
+2. Run Calamares installer
+3. **Partitioning**: Select BTRFS (critical for snapshots)
+4. **Swap**: Create swap partition (recommended: 32GB+)
+5. Complete install & Reboot
 
 ---
 
 ## Part 2: Post-Install Configuration
 
-### Quick Install (One Command)
+### Quick Install
 
+**Option 1: Short URL (via Bootstrap)**
 ```bash
 curl -fsSL https://bit.ly/strix-halo | sudo bash
 ```
+> **What this does:** Fetches `install.sh` from GitHub, which downloads the binary release to `/tmp` and executes it.
 
-Or direct from GitHub:
+**Option 2: Direct Binary Download**
 ```bash
 curl -fsSL https://github.com/daveweinstein1/strix-halo-setup/releases/latest/download/strix-install -o /tmp/s && chmod +x /tmp/s && sudo /tmp/s
 ```
 
-### What the Installer Does
+### Installer Options
 
-| Stage | Purpose |
-|-------|---------|
-| Kernel Config | IOMMU, device quirks |
-| Graphics Stack | Mesa 25.3+, Vulkan |
-| System Update | Mirror ranking, updates |
-| LXD Setup | Containers, GPU passthrough |
-| Thermal Control | Fan management (optional) |
-| Cleanup | Remove orphans |
-| Validation | Verify setup |
-| Desktop Apps | Browsers, Office (optional) |
-| Workspaces | ai-lab, dev-lab (optional) |
+| Flag | Description |
+|------|-------------|
+| (none) | Auto-detects best UI (Web → TUI) |
+| `--tui` | Forces Terminal UI |
+| `--web` | Forces Web UI (localhost:8080) |
+| `--menu` | (Coming Soon) Interactive stage selection |
 
-### Options
+### What Gets Configured
 
-```bash
-sudo ./strix-install --tui    # Terminal mode
-sudo ./strix-install --web    # Browser mode
-sudo ./strix-install --menu   # Select stages
-```
-
----
-
-## Device-Specific Notes
-
-### Beelink GTR9 Pro
-- **E610 Ethernet**: Must be disabled in BIOS *and* kernel blacklist
-- Installer applies `modprobe.blacklist=ice` automatically
-
-### Framework Desktop
-- Works out of the box
-- No quirks needed
-
-### Minisforum S1 Max
-- Advisory for USB4 and Ethernet edge cases
-- Works for most users
+| Stage | Actions Taken |
+|-------|---------------|
+| **1. Kernel** | Adds `amd_iommu=on`, `iommu=pt`. Blacklists `ice` driver on Beelink. |
+| **2. Graphics** | Installs Mesa 25.3+, Vulkan, LLVM 21. Configures RADV. |
+| **3. System** | Updates mirrors, installs `base-devel`, `git`, `btop`. |
+| **4. LXD** | Installs LXD, configures current user, enables GPU passthrough. |
+| **5. Thermal** | Installs `lm_sensors`, `fancontrol`. Runs sensor detection. |
+| **6. Cleanup** | Removes orphans, clears distinct package caches. |
+| **7. Validate** | Checks `glxinfo`, `vulkaninfo`, container health. |
+| **8. Apps** | Optional: Firefox, VLC, Signal, coding tools. |
+| **9. Workspaces** | Optional: Creates `ai-lab` (ROCm) and `dev-lab` containers. |
 
 ---
 
 ## Troubleshooting
 
-### No display after boot
-Add `nomodeset` to kernel parameters temporarily, then run installer.
+### Connectivity
 
-### Script fails
-Check logs at `~/.config/strix-install/logs/`
+**Ethernet keeps dropping (Beelink)**
+- This is the E610 driver bug.
+- **Fix**: Check BIOS settings (see Step 2). Ensure installer Stage 1 ran (blacklists `ice`).
+- **Workaround**: Use Wi-Fi or USB-C Ethernet dongle.
 
-### System won't boot
-Boot from CachyOS USB, chroot, and fix:
-```bash
-sudo mount /dev/nvme0n1p2 /mnt
-sudo arch-chroot /mnt
-journalctl -xb
-```
+**Wi-Fi slow/unstable**
+- **Fix**: Disable power saving: `sudo iw dev wlan0 set power_save off`
+
+### Graphics / Display
+
+**Black screen on boot**
+- **Fix**: Add `nomodeset` to kernel params in GRUB. Then run installer Stage 2.
+
+**Stuttering / Glitches**
+- **Fix**: Ensure `xf86-video-amdgpu` is installed. Check `dmesg | grep amdgpu` for firmware errors.
+- **Ref**: [Arch Wiki - AMDGPU](https://wiki.archlinux.org/title/AMDGPU#Troubleshooting)
+
+### Virtualization
+
+**LXD "Permission Denied"**
+- **Fix**: Log out and back in. Group membership (`lxd`) applies on next login.
+
+**VMs/Containers slow**
+- **Fix**: Verify SVM is enabled in BIOS: `dmesg | grep -i svm` should show "SVM enabled".
+
+### AI / ROCm
+
+**"HIP device not found"**
+- **Fix**: Verify user is in `video` and `render` groups: `groups`.
+- **Fix**: Ensure `hsa-amd-aqlprofile-bin` is installed (handled by installer).
 
 ---
 
-## Validation Checklist
+## Technical Architecture
 
-After installation, verify:
+For a deep dive on how the installer works, stage dependencies, and deployment flow, see the [Architecture Document](ARCHITECTURE.md).
 
-- [ ] `glxinfo | grep -i renderer` shows RADV
-- [ ] `vulkaninfo` runs without errors
-- [ ] `lxc list` shows no errors
-- [ ] System stable through reboots
+```mermaid
+graph TD
+    A[Boot CachyOS] --> B[Install OS]
+    B --> C[Run strix-install]
+    C --> D{Check Device}
+    D -->|Beelink| E[Apply E610 Fix]
+    D -->|Framework| F[Standard Config]
+    E --> G[Install GPU Stack]
+    F --> G
+    G --> H[Setup Containers]
+```
