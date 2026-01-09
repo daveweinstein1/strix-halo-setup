@@ -145,9 +145,13 @@ AI and development tools are **bleeding edge** — ROCm, PyTorch, and AI coding 
 - ❌ Commercial use requires separate license
 - ❌ Redistribution not permitted
 
+**Hardware manufacturers & integrators:** Interested in bundling this with your Strix Halo products? [Open an issue](https://github.com/daveweinstein1/strix-halo-setup/issues) to discuss licensing.
+
 ---
 
 <p align="center">
   <strong>Author:</strong> Dave Weinstein<br>
+  <strong>Contact:</strong> <a href="https://github.com/daveweinstein1/strix-halo-setup/issues">GitHub Issues</a><br>
   <strong>Updated:</strong> January 2026
 </p>
+
