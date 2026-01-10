@@ -1,0 +1,9 @@
+{
+    "name": "strixforge-frontend",
+    "version": "1.0.0",
+    "private": true,
+    "scripts": {
+        "build": "node -e \"console.log('Frontend ready')\"",
+        "dev": "node -e \"console.log('Dev mode')\""
+    }
+}

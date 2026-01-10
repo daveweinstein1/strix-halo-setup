@@ -90,19 +90,19 @@ We have written detailed guides to help you understand the architecture and get 
 
 The name **StrixForge** wasn't chosen by accident. In ancient mythology, the *Strix* was a bird of ill omen, a screeching owl that brought terror in the night. When we first got our hands on the AMD Strix Halo hardware, that's exactly what it felt like. The hardware was a beast, massive unified memory, incredible potential, but the software stack was a nightmare of broken dependencies, kernel panics, and fragmented documentation. It screeched at us every time we tried to run a simple inference, "GGGGGGGGG....", over and over. ;-)
 
-We built this project to silence the screeching. We built it to take the raw, chaotic potential of the "Strix Halo" APU and put it through the Forge, hammering out the imperfections, taming the drivers, and sharpening the software stack until it became a precise, reliable tool.
+This project is to silence the screeching, to take the raw, chaotic potential of the "Strix Halo" APU and put it through the Forge, hammer out the imperfections, tame the drivers, and sharpen the software stack until it became a precise, reliable tool.
 
 ## Why We Built This
 
 Just a few months ago, the drivers and core libraries were so disjointed that even a seasoned software engineer would give up after a week of frustration and go shopping for a DGX Spark. While there has been significant effort from AMD and others to get the low-level "plumbing" working, the reality on the ground is still a dependency nightmare.
 
-**Strixforge simplifies this chaos in two specific ways:**
+**StrixForge simplifies this chaos in two specific ways:**
 
 1.  **Automated Configuration:** It handles the tedious configuration and installation of all the base packages you need on the host. It applies critical kernel patches (like the Beelink E610 fix) automatically.
 2.  **Containerized Safety:** It sets up LXD containers that allow you to leverage the work of elite developers (like `kyuz0`) or to experiment with bleeding-edge software. We help you simple spin up a container so you can safely try out a new app or technology without putting your development machine at risk. If it makes a mess inside the container, your host system remains pristine.
 
 ### Who This Is For
-This is for the **"People in the Middle."**
+It's for the **"People in the Middle."**
 
 You are a developer, a data scientist, or a power user. You know what a tensor is, and you know why you want local inference. But you **don't** want to be a Linux kernel maintainer.
 * You want to write code, not debug `make` files.

@@ -1,5 +1,5 @@
 {
-  "name": "strix-installer",
+  "name": "strixforge",
   "version": "0.1.0",
   "author": {
     "name": "Dave Weinstein",
@@ -7,11 +7,11 @@
   },
   "debounceMS": 100,
   "appargs": "",
-  "outputfilename": "strix-install-gui",
+  "outputfilename": "strixforge",
   "wailsjsdir": "./frontend/wailsjs",
   "assetdir": "./frontend/dist",
-  "frontend:build": "echo 'Building frontend...'",
-  "frontend:install": "echo 'Installing frontend dependencies...'",
+  "frontend:build": "echo 'Frontend already built'",
+  "frontend:install": "echo 'No deps to install'",
   "frontend:dev:watcher": "",
   "frontend:dev:serverUrl": "auto"
 }
