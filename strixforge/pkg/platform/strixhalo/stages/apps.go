@@ -75,6 +75,36 @@ func (s *AppsStage) Run(ctx context.Context, ui core.UI) error {
 		}
 	}
 
+	// Step 4: Special Suites (NordVPN)
+	if ui.Confirm("Install NordVPN Suite (CLI + KDE Tray Icon)?", false) {
+		ui.Progress(60, "Installing NordVPN Suite...")
+
+		// 1. Install packages
+		nordPackages := []string{"nordvpn-bin", "nordvpn-plasmoid"}
+		if err := yay.Install(ctx, nordPackages...); err != nil {
+			ui.Log(core.LogWarn, fmt.Sprintf("Failed to install NordVPN packages: %v", err))
+		} else {
+			ui.Log(core.LogInfo, "✓ NordVPN packages installed")
+
+			// 2. Configure Group
+			// usermod -aG nordvpn $USER
+			if _, err := system.ExecSudo(ctx, "usermod", "-aG", "nordvpn", username); err != nil {
+				ui.Log(core.LogWarn, fmt.Sprintf("Failed to add user to nordvpn group: %v", err))
+			} else {
+				ui.Log(core.LogInfo, "✓ User added to 'nordvpn' group")
+			}
+
+			// 3. Enable Service
+			// systemctl enable --now nordvpnd
+			sysd := system.NewSystemd()
+			if err := sysd.EnableAndStart(ctx, "nordvpnd"); err != nil {
+				ui.Log(core.LogWarn, fmt.Sprintf("Failed to enable nordvpnd: %v", err))
+			} else {
+				ui.Log(core.LogInfo, "✓ NordVPN service enabled and started")
+			}
+		}
+	}
+
 	ui.Progress(100, "Desktop software installation complete")
 	return nil
 }
