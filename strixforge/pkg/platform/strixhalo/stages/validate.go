@@ -3,6 +3,7 @@ package stages
 import (
 	"context"
 	"fmt"
+	"os"
 	"os/exec"
 	"strings"
 
@@ -23,7 +24,6 @@ func (s *ValidateStage) Description() string {
 func (s *ValidateStage) Optional() bool { return false }
 
 func (s *ValidateStage) Run(ctx context.Context, ui core.UI) error {
-	grub := system.NewGrub()
 	systemd := system.NewSystemd()
 	failures := 0
 
@@ -45,11 +45,22 @@ func (s *ValidateStage) Run(ctx context.Context, ui core.UI) error {
 
 	// Check 2: Kernel parameters
 	ui.Progress(25, "Checking kernel parameters...")
-	hasIOMMU, _ := grub.HasParam(ctx, "iommu=pt")
+
+	// We check /proc/cmdline directly (current running kernel)
+	cmdlineBytes, err := os.ReadFile("/proc/cmdline")
+	hasIOMMU := false
+	if err == nil {
+		if strings.Contains(string(cmdlineBytes), "iommu=pt") {
+			hasIOMMU = true
+		}
+	}
+
 	if hasIOMMU {
 		ui.Log(core.LogInfo, "✓ IOMMU passthrough enabled")
 	} else {
-		ui.Log(core.LogWarn, "✗ iommu=pt not in current cmdline (reboot may be needed)")
+		// Log a warning: verify if it's configured in bootloader but we just haven't rebooted?
+		// Checking all bootloaders is complex, so for validation we focus on "active" state
+		ui.Log(core.LogWarn, "✗ iommu=pt not active (reboot needed?)")
 	}
 
 	// Check 3: GPU rendering

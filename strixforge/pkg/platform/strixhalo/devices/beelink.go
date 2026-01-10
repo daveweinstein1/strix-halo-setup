@@ -5,6 +5,7 @@ import (
 
 	"github.com/daveweinstein1/strixforge/pkg/core"
 	"github.com/daveweinstein1/strixforge/pkg/system"
+	"github.com/daveweinstein1/strixforge/pkg/system/bootloader"
 )
 
 // BeelinkGTR9 represents the Beelink GTR9 Pro with Strix Halo
@@ -37,8 +38,18 @@ func (d *BeelinkGTR9) buildQuirks() []core.Quirk {
 			Description: "Blacklist Intel E610 Ethernet driver (crashes under GPU load)",
 			Type:        core.QuirkAuto,
 			Apply: func(ctx context.Context) error {
-				grub := system.NewGrub()
-				return grub.AddCmdlineParam(ctx, "modprobe.blacklist=ice")
+				loaders := bootloader.Detect()
+				if len(loaders) == 0 {
+					return nil // Bootloader not managed or detected, skipping
+				}
+
+				var lastErr error
+				for _, loader := range loaders {
+					if err := loader.AddParam(ctx, "modprobe.blacklist=ice"); err != nil {
+						lastErr = err
+					}
+				}
+				return lastErr
 			},
 		},
 		{

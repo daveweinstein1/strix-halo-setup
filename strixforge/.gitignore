@@ -1,2 +1,4 @@
 strix-install
 strix-install.exe
+build/
+frontend/dist/

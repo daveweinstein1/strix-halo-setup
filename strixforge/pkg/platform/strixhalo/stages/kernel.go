@@ -10,7 +10,8 @@ import (
 	"strings"
 
 	"github.com/daveweinstein1/strixforge/pkg/core"
-	"github.com/daveweinstein1/strixforge/pkg/system"
+
+	"github.com/daveweinstein1/strixforge/pkg/system/bootloader"
 )
 
 // KernelStage configures kernel and bootloader
@@ -31,8 +32,6 @@ func (s *KernelStage) Description() string {
 func (s *KernelStage) Optional() bool { return false }
 
 func (s *KernelStage) Run(ctx context.Context, ui core.UI) error {
-	grub := system.NewGrub()
-
 	// Step 1: Check kernel version
 	ui.Progress(10, "Checking kernel version...")
 	version, err := getKernelVersion()
@@ -49,35 +48,39 @@ func (s *KernelStage) Run(ctx context.Context, ui core.UI) error {
 	}
 	ui.Log(core.LogInfo, "✓ Kernel version meets requirements")
 
-	// Step 2: Backup GRUB
-	if grub.IsInstalled() {
-		ui.Progress(25, "Backing up GRUB configuration...")
-		backupPath, err := grub.Backup(ctx)
-		if err != nil {
-			ui.Log(core.LogWarn, fmt.Sprintf("Could not backup GRUB: %v", err))
-		} else {
-			ui.Log(core.LogInfo, fmt.Sprintf("GRUB backup: %s", backupPath))
+	// Step 2: Configure Bootloader(s)
+	// We now support GRUB, systemd-boot, Limine, and rEFInd
+	loaders := bootloader.Detect()
+	if len(loaders) > 0 {
+		ui.Log(core.LogInfo, fmt.Sprintf("Detected %d active bootloader(s)", len(loaders)))
+
+		for _, loader := range loaders {
+			ui.Log(core.LogInfo, fmt.Sprintf("Configuring: %s", loader.Name()))
+
+			// Backup
+			ui.Progress(25, fmt.Sprintf("Backing up %s config...", loader.Name()))
+			if backupPath, err := loader.Backup(ctx); err != nil {
+				ui.Log(core.LogWarn, fmt.Sprintf("Could not backup %s: %v", loader.Name(), err))
+			} else {
+				ui.Log(core.LogInfo, fmt.Sprintf("Backup created: %s", backupPath))
+			}
+
+			// Add Parameters
+			ui.Progress(40, fmt.Sprintf("Adding kernel parameters to %s...", loader.Name()))
+
+			// IOMMU
+			if err := loader.AddParam(ctx, "iommu=pt"); err != nil {
+				ui.Log(core.LogWarn, fmt.Sprintf("Failed to add iommu=pt to %s: %v", loader.Name(), err))
+			}
+			// AMD P-State
+			if err := loader.AddParam(ctx, "amd_pstate=active"); err != nil {
+				ui.Log(core.LogWarn, fmt.Sprintf("Failed to add amd_pstate=active to %s: %v", loader.Name(), err))
+			}
 		}
 	} else {
-		ui.Log(core.LogWarn, "GRUB not detected (using systemd-boot?). Skipping GRUB backup.")
-	}
-
-	// Step 3: Add required kernel parameters
-	ui.Progress(40, "Configuring kernel parameters...")
-
-	if grub.IsInstalled() {
-		// IOMMU for GPU passthrough
-		if err := grub.AddCmdlineParam(ctx, "iommu=pt"); err != nil {
-			ui.Log(core.LogWarn, fmt.Sprintf("Could not add iommu=pt: %v", err))
-		}
-
-		// AMD P-State driver
-		if err := grub.AddCmdlineParam(ctx, "amd_pstate=active"); err != nil {
-			ui.Log(core.LogWarn, fmt.Sprintf("Could not add amd_pstate=active: %v", err))
-		}
-	} else {
-		ui.Log(core.LogWarn, "⚠ Bootloader is not GRUB. Cannot auto-configure kernel parameters.")
-		ui.Log(core.LogWarn, "MANUAL ACTION REQUIRED: Add 'iommu=pt amd_pstate=active' to your bootloader config.")
+		// No bootloader detected (or custom setup)
+		ui.Log(core.LogWarn, "⚠ No supported bootloader detected! (Checked: GRUB, systemd-boot, Limine, rEFInd)")
+		ui.Log(core.LogWarn, "MANUAL ACTION REQUIRED: Add 'iommu=pt amd_pstate=active' to your kernel arguments.")
 	}
 
 	// Step 4: Apply device-specific quirks
@@ -114,16 +117,6 @@ func (s *KernelStage) Run(ctx context.Context, ui core.UI) error {
 		}
 	} else {
 		ui.Log(core.LogWarn, fmt.Sprintf("Could not determine system RAM: %v. Skipping ZRAM optimization.", err))
-	}
-
-	// Step 6: Update GRUB
-	ui.Progress(90, "Updating bootloader configuration...")
-	if grub.IsInstalled() {
-		if err := grub.UpdateGrub(ctx); err != nil {
-			return fmt.Errorf("failed to update GRUB: %v", err)
-		}
-	} else {
-		ui.Log(core.LogInfo, "Skipping GRUB update (not installed).")
 	}
 
 	ui.Progress(100, "Kernel configuration complete")
