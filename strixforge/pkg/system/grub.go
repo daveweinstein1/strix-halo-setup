@@ -21,6 +21,19 @@ func NewGrub() *Grub {
 	}
 }
 
+// IsInstalled checks if GRUB seems to be the active/installed bootloader
+func (g *Grub) IsInstalled() bool {
+	// Check for config dir
+	if _, err := os.Stat("/boot/grub"); os.IsNotExist(err) {
+		return false
+	}
+	// Check for defaults file
+	if _, err := os.Stat(g.configPath); os.IsNotExist(err) {
+		return false
+	}
+	return true
+}
+
 // Backup creates a timestamped backup of grub config
 func (g *Grub) Backup(ctx context.Context) (string, error) {
 	timestamp := time.Now().Format("20060102-150405")

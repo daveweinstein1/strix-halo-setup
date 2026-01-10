@@ -50,25 +50,34 @@ func (s *KernelStage) Run(ctx context.Context, ui core.UI) error {
 	ui.Log(core.LogInfo, "✓ Kernel version meets requirements")
 
 	// Step 2: Backup GRUB
-	ui.Progress(25, "Backing up GRUB configuration...")
-	backupPath, err := grub.Backup(ctx)
-	if err != nil {
-		ui.Log(core.LogWarn, fmt.Sprintf("Could not backup GRUB: %v", err))
+	if grub.IsInstalled() {
+		ui.Progress(25, "Backing up GRUB configuration...")
+		backupPath, err := grub.Backup(ctx)
+		if err != nil {
+			ui.Log(core.LogWarn, fmt.Sprintf("Could not backup GRUB: %v", err))
+		} else {
+			ui.Log(core.LogInfo, fmt.Sprintf("GRUB backup: %s", backupPath))
+		}
 	} else {
-		ui.Log(core.LogInfo, fmt.Sprintf("GRUB backup: %s", backupPath))
+		ui.Log(core.LogWarn, "GRUB not detected (using systemd-boot?). Skipping GRUB backup.")
 	}
 
 	// Step 3: Add required kernel parameters
 	ui.Progress(40, "Configuring kernel parameters...")
 
-	// IOMMU for GPU passthrough
-	if err := grub.AddCmdlineParam(ctx, "iommu=pt"); err != nil {
-		ui.Log(core.LogWarn, fmt.Sprintf("Could not add iommu=pt: %v", err))
-	}
+	if grub.IsInstalled() {
+		// IOMMU for GPU passthrough
+		if err := grub.AddCmdlineParam(ctx, "iommu=pt"); err != nil {
+			ui.Log(core.LogWarn, fmt.Sprintf("Could not add iommu=pt: %v", err))
+		}
 
-	// AMD P-State driver
-	if err := grub.AddCmdlineParam(ctx, "amd_pstate=active"); err != nil {
-		ui.Log(core.LogWarn, fmt.Sprintf("Could not add amd_pstate=active: %v", err))
+		// AMD P-State driver
+		if err := grub.AddCmdlineParam(ctx, "amd_pstate=active"); err != nil {
+			ui.Log(core.LogWarn, fmt.Sprintf("Could not add amd_pstate=active: %v", err))
+		}
+	} else {
+		ui.Log(core.LogWarn, "⚠ Bootloader is not GRUB. Cannot auto-configure kernel parameters.")
+		ui.Log(core.LogWarn, "MANUAL ACTION REQUIRED: Add 'iommu=pt amd_pstate=active' to your bootloader config.")
 	}
 
 	// Step 4: Apply device-specific quirks
@@ -108,9 +117,13 @@ func (s *KernelStage) Run(ctx context.Context, ui core.UI) error {
 	}
 
 	// Step 6: Update GRUB
-	ui.Progress(90, "Updating GRUB configuration...")
-	if err := grub.UpdateGrub(ctx); err != nil {
-		return fmt.Errorf("failed to update GRUB: %v", err)
+	ui.Progress(90, "Updating bootloader configuration...")
+	if grub.IsInstalled() {
+		if err := grub.UpdateGrub(ctx); err != nil {
+			return fmt.Errorf("failed to update GRUB: %v", err)
+		}
+	} else {
+		ui.Log(core.LogInfo, "Skipping GRUB update (not installed).")
 	}
 
 	ui.Progress(100, "Kernel configuration complete")
