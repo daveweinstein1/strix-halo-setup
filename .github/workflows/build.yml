@@ -10,6 +10,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
     
+    defaults:
+      run:
+        working-directory: ./strixforge
+    
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -18,9 +22,9 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version: '1.23'
+          cache-dependency-path: strixforge/go.sum
       
       - name: Build Linux binary
-        working-directory: ./strixforge
         run: |
           go build -ldflags="-s -w" -o strixforge .
           chmod +x strixforge
