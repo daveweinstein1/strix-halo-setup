@@ -452,13 +452,13 @@
 
         <h3>Quick Install</h3>
         <p><strong>Option 1: Short URL (via Bootstrap)</strong></p>
-        <pre><code>curl -fsSL https://bit.ly/strix-halo | sudo bash</code></pre>
+        <pre><code>curl -fsSL https://bit.ly/strixforge | sudo bash</code></pre>
         <p><em>This fetches <code>install.sh</code> from GitHub, which downloads the binary release to <code>/tmp</code>
                 and executes it. For a deep dive on exactly how this script works and the architecture behind it, please
-                read the <a href="https://github.com/daveweinstein1/strix-halo-setup">README on GitHub</a>.</em></p>
+                read the <a href="https://github.com/daveweinstein1/strixforge">README on GitHub</a>.</em></p>
 
         <p><strong>Option 2: Direct Binary Download</strong></p>
-        <pre><code>curl -fsSL https://github.com/daveweinstein1/strix-halo-setup/releases/latest/download/strix-install -o /tmp/s && chmod +x /tmp/s && sudo /tmp/s</code></pre>
+        <pre><code>curl -fsSL https://github.com/daveweinstein1/strixforge/releases/latest/download/strixforge -o /tmp/s && chmod +x /tmp/s && sudo /tmp/s</code></pre>
 
         <h3>Installer Options</h3>
         <div class="table-responsive">
@@ -509,7 +509,7 @@
         <h3>Container Hub</h3>
         <p>The installer includes a graphical browser for community-maintained container images optimized for Strix
             Halo. Launch the hub to explore available toolboxes:</p>
-        <pre><code>strix-install --hub</code></pre>
+        <pre><code>strixforge --hub</code></pre>
 
         <div class="table-responsive">
             <table>
@@ -940,7 +940,7 @@ ROCm/AI
         <div class="mermaid">
             graph TD
             A[Boot CachyOS] --> B[Install OS]
-            B --> C[Run strix-install]
+            B --> C[Run strixforge]
             C --> D{Check Device}
             D -->|Beelink| E[Apply E610 Fix]
             D -->|Framework| F[Standard Config]
