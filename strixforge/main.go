@@ -6,6 +6,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"runtime"
 	"strings"
 
 	"github.com/charmbracelet/bubbles/progress"
@@ -24,6 +25,11 @@ import (
 
 //go:embed all:frontend/dist
 var guiAssets embed.FS
+
+// guiInstallReady indicates whether the GUI has a complete install wizard.
+// Set to true once the GUI frontend can run all stages (not just display status).
+// When false, auto-detect mode will fall back to TUI for actual installations.
+const guiInstallReady = false
 
 var (
 	forceTUI        = flag.Bool("tui", false, "Force TUI mode")
@@ -67,9 +73,20 @@ func main() {
 		return
 	}
 
-	// Auto-detect: GUI if display available, otherwise TUI
-	if os.Getenv("DISPLAY") != "" || os.Getenv("WAYLAND_DISPLAY") != "" {
+	// Auto-detect: GUI if display available AND GUI is install-ready, otherwise TUI
+	// Windows and macOS always have a display
+	// Linux needs DISPLAY or WAYLAND_DISPLAY set
+	hasDisplay := runtime.GOOS == "windows" || runtime.GOOS == "darwin" ||
+		os.Getenv("DISPLAY") != "" || os.Getenv("WAYLAND_DISPLAY") != ""
+
+	if hasDisplay && guiInstallReady {
 		runGUI()
+	} else if hasDisplay && !guiInstallReady {
+		// GUI detected but not install-ready - inform user and use TUI
+		fmt.Println(infoStyle.Render("ℹ GUI installer is still in development."))
+		fmt.Println("  Using TUI mode for installation. Use --gui to preview the dashboard.")
+		fmt.Println()
+		runTUI()
 	} else {
 		runTUI()
 	}
@@ -209,6 +226,13 @@ func (a *autoUIAdapter) Input(message string, defaultVal string) string {
 
 // runGUI starts the native Wails GUI
 func runGUI() {
+	// Warn user if GUI is not install-ready but they forced it with --gui
+	if !guiInstallReady {
+		fmt.Println(warnStyle.Render("⚠ GUI is in preview mode - dashboard only, no install wizard yet."))
+		fmt.Println("  To run the actual installation, exit and use: strixforge --tui")
+		fmt.Println()
+	}
+
 	// Create an instance of the app structure
 	app := NewGUIApp()
 
@@ -250,9 +274,24 @@ func (a *GUIApp) startup(ctx context.Context) {
 	a.ctx = ctx
 }
 
-// GetSystemStatus returns detected hardware info
+// GetSystemStatus returns detected hardware info (mock data on Windows for demo)
 func (a *GUIApp) GetSystemStatus() map[string]string {
 	status := make(map[string]string)
+
+	// On Windows, return demo data for UI development
+	if runtime.GOOS == "windows" {
+		status["name"] = "Framework Desktop (Demo)"
+		status["manufacturer"] = "Framework Computer Inc"
+		status["model"] = "FRANMDCP08"
+		status["cpu"] = "AMD Ryzen AI Max 395 (Strix Halo)"
+		status["gpu"] = "AMD Radeon 8060S (gfx1151)"
+		status["memory"] = "128 GB DDR5-5600"
+		status["quirks_count"] = "0"
+		status["status"] = "Ready for installation"
+		return status
+	}
+
+	// On Linux, use real detection
 	device, err := strixhalo.Detect(a.ctx)
 	if err != nil {
 		status["error"] = err.Error()
@@ -265,8 +304,45 @@ func (a *GUIApp) GetSystemStatus() map[string]string {
 	return status
 }
 
-// FetchHubImages returns all available images from Container Hub
+// FetchHubImages returns available container images (mock data on Windows for demo)
 func (a *GUIApp) FetchHubImages() []containerhub.Image {
+	// On Windows, return demo data for UI development
+	if runtime.GOOS == "windows" {
+		return []containerhub.Image{
+			{
+				Name:        "rocm-pytorch",
+				Description: "PyTorch 2.6 with ROCm 7.2 - optimized for Strix Halo",
+				Source:      "ghcr.io/kyuz0",
+				URL:         "ghcr.io/kyuz0/rocm-pytorch:latest",
+			},
+			{
+				Name:        "comfyui",
+				Description: "ComfyUI with ROCm acceleration - Stable Diffusion workflows",
+				Source:      "ghcr.io/kyuz0",
+				URL:         "ghcr.io/kyuz0/comfyui:latest",
+			},
+			{
+				Name:        "ollama",
+				Description: "Ollama LLM server - run Llama, Mistral, Gemma locally",
+				Source:      "ghcr.io/kyuz0",
+				URL:         "ghcr.io/kyuz0/ollama:latest",
+			},
+			{
+				Name:        "dev-toolbox",
+				Description: "Full development environment - Go, Rust, Python, Node.js",
+				Source:      "community",
+				URL:         "ghcr.io/kyuz0/dev-toolbox:latest",
+			},
+			{
+				Name:        "amd-aie",
+				Description: "AMD AI Engine SDK for NPU acceleration",
+				Source:      "amd-official",
+				URL:         "ghcr.io/amd/aie-sdk:latest",
+			},
+		}
+	}
+
+	// On Linux, fetch real images
 	images, err := a.marketplaceMgr.FetchAllImages(a.ctx)
 	if err != nil {
 		return []containerhub.Image{}
